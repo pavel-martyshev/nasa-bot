@@ -1,0 +1,25 @@
+# from mistralai import Mistral
+#
+# api_key = "wjOjJC2GuO7GhoT2AkA7ZspLjYoDwwJi"
+# model = "mistral-small-latest"
+#
+# client = Mistral(api_key=api_key)
+#
+# chat_response = client.chat.complete(
+#     model= model,
+#     messages = [
+#         {
+#             "role": "user",
+#             "content": "Translate to Russian. But send only next message. Will the spider ever catch the fly? Not if both are large emission nebulas toward the "
+#                        "constellation of the Charioteer (Auriga).  The spider-shaped gas cloud in the image center "
+#                        "is actually an emission nebula labelled IC 417, while the smaller fly-shaped cloud on the left "
+#                        "is dubbed  NGC 1931 and is both an emission nebula and a reflection nebula.  About 10,000 "
+#                        "light-years distant, both nebulas harbor young star clusters. For scale, the more compact NGC "
+#                        "1931 (Fly) is about 10 light-years across. The featured deep image, captured over 20 hours "
+#                        "during late January in Berkshire UK, also shows more diffuse and red-glowing interstellar gas "
+#                        "and dust. Explore Your Universe: Random APOD Generator",
+#         },
+#     ]
+# )
+#
+# print(chat_response.choices[0].message.content)
