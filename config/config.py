@@ -5,7 +5,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     token: str
-    api_key: str
+    nasa_api_base_url: str
+    nasa_api_key: str
     mistral_api_key: str
 
     model_config = SettingsConfigDict(

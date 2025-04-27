@@ -1,0 +1,29 @@
+from datetime import datetime
+
+from aiogram.types import Message
+from aiogram_dialog import DialogManager
+from aiogram_dialog.widgets.input import MessageInput
+
+from states import APODSG
+
+
+async def handle_selected_date(message: Message, _widget: MessageInput, dialog_manager: DialogManager):
+    if message.from_user.language_code == "ru":
+        date_format = "%d.%m.%Y"
+    else:
+        date_format = "%d/%m/%Y"
+
+    try:
+        date = datetime.strptime(message.text, date_format)
+    except ValueError:
+        return dialog_manager.dialog_data.update(incorrect_format=True)
+
+    if date > datetime.now() or date < datetime(1995, 6, 16):
+        return dialog_manager.dialog_data.update(incorrect_format=True)
+
+    dialog_manager.dialog_data.update(apod_date=datetime.strftime(date, "%Y-%m-%d"))
+    await dialog_manager.switch_to(APODSG.apod_menu)
+
+
+async def handle_incorrect_message(_message: Message, _widget: MessageInput, dialog_manager: DialogManager):
+    dialog_manager.dialog_data.update(incorrect_format=True)
