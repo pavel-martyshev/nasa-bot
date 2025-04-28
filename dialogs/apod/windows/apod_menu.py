@@ -4,16 +4,16 @@ from aiogram_dialog.widgets.kbd import SwitchTo, Button, Row
 from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Format, Const
 
-from dialogs.apod.getters.apod_menu import getter
+from dialogs.apod.getters.apod_menu import ApodProvider
 from dialogs.apod.handlers.apod_menu import on_random_apod
-from dialogs.apod.texts import DATE_SELECTION, RANDOM_APOD
+from dialogs.apod.texts import DATE_SELECTION, RANDOM_APOD, APOD_CAPTION, MEDIA_NOT_EXIST
 from dialogs.common.widgets import back_to_main_menu
 from states import APODSG
 
 apod_menu = Window(
-    DynamicMedia("media", when=F["media"]),
-    Format("Дата: {date}\n", when=F["date"]),
-    Format("{explanation}", when=F["explanation"]),
+    DynamicMedia("media", when=F["is_media_exist"]),
+    Format(APOD_CAPTION, when=F["is_media_exist"]),
+    Format(MEDIA_NOT_EXIST, when=~F["is_media_exist"]),
     Row(
         SwitchTo(
             Const(DATE_SELECTION),
@@ -27,6 +27,6 @@ apod_menu = Window(
         )
     ),
     back_to_main_menu,
-    getter=getter,
+    getter=ApodProvider(),
     state=APODSG.apod_menu
 )

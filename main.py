@@ -10,14 +10,14 @@ from aiogram_dialog import DialogManager, StartMode, setup_dialogs
 from icecream import ic
 from redis.asyncio import Redis
 
-from config import config
+from config import app_config
 from dialogs import apod_dialog, main_menu_dialog
 from states import MainMenuSG
 
 redis = Redis()
 storage = RedisStorage(redis, key_builder=DefaultKeyBuilder(prefix="nasa-bot", with_destiny=True))
 
-bot = Bot(config.token)
+bot = Bot(app_config.token)
 dp = Dispatcher(bot=bot, storage=storage)
 
 
@@ -41,6 +41,7 @@ async def _on_shutdown() -> None:
     Logs the stop of the bot.
     """
     # logger.warning("Bot stopped")
+    from icecream import ic
     ic('Bot stopped')
 
 
