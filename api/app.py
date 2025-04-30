@@ -9,21 +9,22 @@ from starlette.responses import JSONResponse
 from tortoise.contrib.pydantic import PydanticModel
 
 from config import app_settings
-from config.log_config import logger
+# from config.log_config import logger
 from database.postgres.core import init_db
 from database.postgres.core.CRUD.APOD import APODCRUD
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logger.warning("API started")
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     logger.warning("API started")
+#
+#     yield
+#
+#     logger.warning("API stopped")
 
-    yield
 
-    logger.warning("API stopped")
-
-
-app = FastAPI(lifespan=lifespan)
+# app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
