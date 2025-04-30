@@ -28,7 +28,7 @@ apod_menu = Window(
     ),
     WebApp(
         text=Const("Описание"),
-        url=Format("https://chatty-rules-make.loca.lt?apod_id={apod_id}&language_code={language_code}"),
+        url=Format("https://nasa-bot-web-app.ru?apod_id={apod_id}&language_code={language_code}"),
     ),
     back_to_main_menu,
     parse_mode="MARKDOWN",
