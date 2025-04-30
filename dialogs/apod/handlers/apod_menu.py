@@ -4,4 +4,4 @@ from aiogram_dialog.widgets.kbd import Button
 
 
 async def on_random_apod(_call: CallbackQuery, _widget: Button, dialog_manager: DialogManager):
-    dialog_manager.dialog_data.update(random_apod=True)
+    dialog_manager.dialog_data.update(is_random=True)

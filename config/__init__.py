@@ -1,10 +1,6 @@
 import builtins
 
-from .config import app_config
+from .app_config import app_settings
 
 
-def install():
-    builtins.app_config = app_config
-
-
-__all__ = ["app_config", "install"]
+__all__ = ["app_settings"]

@@ -1,6 +1,6 @@
 from aiogram import F
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import SwitchTo, Button, Row
+from aiogram_dialog.widgets.kbd import SwitchTo, Button, Row, WebApp
 from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Format, Const
 
@@ -26,7 +26,12 @@ apod_menu = Window(
             id="random_apod"
         )
     ),
+    WebApp(
+        text=Const("Описание"),
+        url=Format("https://chatty-rules-make.loca.lt?apod_id={apod_id}&language_code={language_code}"),
+    ),
     back_to_main_menu,
+    parse_mode="MARKDOWN",
     getter=ApodProvider(),
     state=APODSG.apod_menu
 )

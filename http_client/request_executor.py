@@ -1,24 +1,23 @@
 from functools import wraps
 
 import aiohttp
-from icecream import ic
+
+from config.log_config import logger
 
 
-def async_request_executor(method: str = "GET"):
+def request_executor(method: str = "GET"):
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            session_request_data = {"method": method.upper(), **kwargs}
+            request_data = {"method": method.upper(), **kwargs}
 
             async with aiohttp.ClientSession() as session:
-                async with session.request(**session_request_data) as response:
-                    try:
-                        return await func(response=response, *args, **kwargs)
-                    except Exception as e:
-                        ic(e)
-                    finally:
-                        await session.close()
+                try:
+                    async with session.request(**request_data) as response:
+                        return await func(response, *args, **kwargs)
+                except Exception as e:
+                    logger.error(e)
+                    raise
 
         return wrapper
-
     return decorator
