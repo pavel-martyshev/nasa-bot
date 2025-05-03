@@ -5,30 +5,25 @@ from aiogram.filters import CommandStart
 from aiogram.methods import DeleteWebhook
 from aiogram.types import Message
 from aiogram_dialog import DialogManager, StartMode, setup_dialogs
+from fluentogram import TranslatorHub
 from tortoise import Tortoise
 
 from config import app_settings
 from config.log_config import logger
 from database.postgres.core import init_db
 from database.redis import storage
-from dialogs import apod_dialog, main_menu_dialog
+from dialogs import apod_dialog, main_menu_dialog, error_dialog
 from states import MainMenuSG
+from utils.create_translator_hub import create_translator_hub
+from utils.middlewares.i18n import TranslatorRunnerMiddleware
 
 bot = Bot(app_settings.token)
 dp = Dispatcher(bot=bot, storage=storage)
 
 
 @dp.message(CommandStart())
-async def root_handler(message: Message, dialog_manager: DialogManager):
-    app_settings.language_code = message.from_user.language_code
-
+async def root_handler(_message: Message, dialog_manager: DialogManager):
     await dialog_manager.start(MainMenuSG.main_menu, mode=StartMode.RESET_STACK)
-
-
-@dp.message(F.web_app_data)
-async def handle_web_app_data(message: Message):
-    data = message.web_app_data.data
-    await message.answer(f"Принятые данные из мини-приложения: {data}")
 
 
 async def on_startup():
@@ -51,14 +46,17 @@ async def main():
     await init_db()
     await Tortoise.generate_schemas()
 
+    translator_hub: TranslatorHub = create_translator_hub()
+    dp.update.middleware(TranslatorRunnerMiddleware())
+
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
-    dp.include_routers(main_menu_dialog, apod_dialog)
+    dp.include_routers(error_dialog, main_menu_dialog, apod_dialog)
     setup_dialogs(dp)
 
     await bot(DeleteWebhook(drop_pending_updates=True))
-    await dp.start_polling(bot)
+    await dp.start_polling(bot, _translator_hub=translator_hub)
 
 
 if __name__ == '__main__':

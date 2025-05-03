@@ -1,6 +1,10 @@
 from aiogram.fsm.state import StatesGroup, State
 
 
+class ErrorDialog(StatesGroup):
+    error = State()
+
+
 class MainMenuSG(StatesGroup):
     main_menu = State()
 

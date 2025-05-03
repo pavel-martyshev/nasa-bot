@@ -1,12 +1,12 @@
 from datetime import datetime
 from typing import Dict, Union, Any
 
-from aiogram import Bot
 from aiogram.enums import ContentType
 from aiogram.types import User
 from aiogram_dialog import DialogManager
 from aiogram_dialog.api.entities import MediaAttachment
 import yt_dlp
+from fluentogram import TranslatorRunner
 from tortoise.contrib.pydantic import PydanticModel
 from yarl import URL
 from yt_dlp import DownloadError
@@ -31,16 +31,6 @@ class ApodProvider:
             query_params["count"] = 1
 
         return app_settings.api.build_url(*self.__apod_url_parts, **query_params)
-
-    @staticmethod
-    def __get_formatted_date(date: str, language_code: str) -> str:
-        if language_code == "ru":
-            return datetime.strftime(datetime.strptime(date, "%Y-%m-%d"), "%d.%m.%Y")
-
-        if language_code == "en":
-            return datetime.strftime(datetime.strptime(date, "%Y-%m-%d"), "%d/%m/%Y")
-
-        return date
 
     @staticmethod
     async def __get_apod_media(media_type: str, media_url: str, apod_date: str) -> Union[MediaAttachment, None]:
@@ -83,7 +73,12 @@ class ApodProvider:
 
         return await self.__prepare_payload(apod_json)
 
-    async def __call__(self, event_from_user: User, dialog_manager: DialogManager, bot: Bot, **_):
+    async def __call__(self,
+                       event_from_user: User,
+                       dialog_manager: DialogManager,
+                       i18n: TranslatorRunner,
+                       language_code: str,
+                       **_):
         apod_date = dialog_manager.dialog_data.pop("apod_date", None)
         is_random = dialog_manager.dialog_data.pop("is_random", False)
 
@@ -99,12 +94,20 @@ class ApodProvider:
             apod: PydanticModel = await self.__apod_crud.get_or_create(**apod_data)
 
             media = await self.__get_apod_media(apod.media_type, apod.url, apod.date)
-        ic(app_settings.language_code)
+
         return {
-            "date": self.__get_formatted_date(str(apod.date), event_from_user.language_code),
-            "title": apod.title_ru,
+            "apod_caption": i18n.get(
+                "apod_caption",
+                date=apod.date,
+                title=apod.title_ru if language_code == "ru" else apod.title
+            ),
+            "media_not_exist_message": i18n.get("media_not_exist"),
+            "select_date_button_text": i18n.get("select_date"),
+            "random_picture_button_text": i18n.get("random_picture"),
+            "explanation_button_text": i18n.get("explanation"),
+            "main_menu_button_text": i18n.get("main_menu"),
             "is_media_exist": bool(media),
             "media": media,
             "apod_id": apod.id,
-            "language_code": app_settings.language_code,
+            "language_code": language_code,
         }

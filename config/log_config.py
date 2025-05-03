@@ -32,13 +32,12 @@ os.makedirs(logs_dir, exist_ok=True)
 filename = os.path.join(logs_dir, app_settings.logs.file_name)
 
 # Define the log format for the file handler
-file_formatter = logging.Formatter(app_settings.logs.handlers_format,
-                                   datefmt=app_settings.logs.date_format)
+file_formatter = logging.Formatter(app_settings.logs.handlers_format)
 
 # Set up a timed rotating file handler
 logs_file_handler = TimedRotatingFileHandler(filename=filename, when=app_settings.logs.time_rotating, interval=1,
                                              encoding="utf-8", backupCount=app_settings.logs.backup_count)
-logs_file_handler.suffix = "%d-%m-%Y"
+logs_file_handler.suffix = "%Y-%m-%d"
 logs_file_handler.setFormatter(file_formatter)
 
 # Set up a stream handler

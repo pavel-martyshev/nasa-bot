@@ -9,10 +9,12 @@ from states import APODSG
 
 
 async def handle_selected_date(message: Message, _widget: MessageInput, dialog_manager: DialogManager):
+    language_code: str = dialog_manager.middleware_data.get("language_code")
+
     try:
         date = datetime.strptime(
             message.text.replace(",", "."),
-            app_settings.date_format
+            app_settings.get_date_format(language_code)
         )
     except ValueError:
         return dialog_manager.dialog_data.update(incorrect_format=True)

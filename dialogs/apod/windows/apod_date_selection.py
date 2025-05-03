@@ -3,18 +3,16 @@ from aiogram.enums import ContentType, ParseMode
 from aiogram_dialog import Window
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Back
-from aiogram_dialog.widgets.text import Const, Format
+from aiogram_dialog.widgets.text import Format
 
 from dialogs.apod.getters.apod_date_selection import getter
 from dialogs.apod.handlers.apod_date_selection import handle_selected_date, handle_incorrect_message
-from dialogs.apod.texts import DATE_REQUEST, INCORRECT_DATE
-from dialogs.texts import INCORRECT_FORMAT, BACK
 from states import APODSG
 
 apod_date_selection = Window(
-    Const(INCORRECT_FORMAT + "\n", when=F["incorrect_format"]),
-    Const(INCORRECT_DATE, when=F["incorrect_date"]),
-    Format(DATE_REQUEST),
+    Format("{incorrect_format_message}" + "\n\n", when=F["incorrect_format"]),
+    Format("{incorrect_date_message}", when=F["incorrect_date"]),
+    Format("{date_request}"),
     MessageInput(
         content_types=ContentType.TEXT,
         func=handle_selected_date,
@@ -24,7 +22,7 @@ apod_date_selection = Window(
         func=handle_incorrect_message,
     ),
     Back(
-        text=Const(BACK)
+        text=Format("{back_button_text}")
     ),
     parse_mode=ParseMode.MARKDOWN,
     getter=getter,

@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from unittest import case
 
 from dotenv import load_dotenv
 from yarl import URL
@@ -27,11 +28,15 @@ class AppSettings:
     db: DatabaseSettings
     api: APISettings
 
-    language_code: str = None
-
-    @property
-    def date_format(self) -> str:
-        return "%Y-%m-%d" if self.language_code == "en" else "%d.%m.%Y"
+    @staticmethod
+    def get_date_format(language_code: str) -> str:
+        match language_code:
+            case "en":
+                return "%m/%d/%Y"
+            case "ru":
+                return "%d.%m.%Y"
+            case _:
+                return "%m/%d/%Y"
 
 
 def load_settings() -> AppSettings:
@@ -75,4 +80,4 @@ def load_settings() -> AppSettings:
 
 
 # Create the final application settings instance
-app_settings = load_settings()
+app_settings: AppSettings = load_settings()
