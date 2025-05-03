@@ -31,7 +31,7 @@ class TranslatorRunnerMiddleware(BaseMiddleware):
 
         if user:
             hub: TranslatorHub = data.get("_translator_hub")
-            data["i18n"] = hub.get_translator_by_locale(locale="ru")  # user.language_code)
-            data["language_code"] = "ru"  # user.language_code
+            data["i18n"] = hub.get_translator_by_locale(locale=user.language_code)
+            data["language_code"] = user.language_code
 
         return await handler(event, data)
