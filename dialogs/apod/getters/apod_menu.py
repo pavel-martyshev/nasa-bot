@@ -13,7 +13,7 @@ from yt_dlp import DownloadError
 
 from config import app_settings
 from config.log_config import log_return_value, logger
-from database.postgres.core.CRUD.APOD import APODCRUD
+from database.postgres.core.CRUD.apod import APODCRUD
 from http_client.aiohttp_client import HttpClient
 
 
@@ -74,7 +74,6 @@ class ApodProvider:
         return await self.__prepare_payload(apod_json)
 
     async def __call__(self,
-                       event_from_user: User,
                        dialog_manager: DialogManager,
                        i18n: TranslatorRunner,
                        language_code: str,
@@ -85,7 +84,7 @@ class ApodProvider:
         if not apod_date and not is_random:
             apod_date = datetime.today().strftime("%Y-%m-%d")
 
-        apod: PydanticModel | None= await self.__apod_crud.get_apod(date=apod_date)
+        apod: PydanticModel | None= await self.__apod_crud.get(date=apod_date)
 
         if apod:
             media = await self.__get_apod_media(apod.media_type, apod.url, apod.date)

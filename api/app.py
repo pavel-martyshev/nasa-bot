@@ -9,7 +9,7 @@ from tortoise.contrib.pydantic import PydanticModel
 from api.origin_filter_middleware import OriginFilterMiddleware, ALLOWED_ORIGINS
 from config import app_settings
 from database.postgres.core import init_db
-from database.postgres.core.CRUD.APOD import APODCRUD
+from database.postgres.core.CRUD.apod import APODCRUD
 
 app = FastAPI()
 
@@ -25,7 +25,7 @@ app.add_middleware(OriginFilterMiddleware)
 
 @app.get("/apodExplanation")
 async def apod_explanation(apod_id: int, language_code: str):
-    apod: PydanticModel = await APODCRUD.get_apod(id=apod_id)
+    apod: PydanticModel = await APODCRUD.get(id=apod_id)
 
     title = apod.title_ru if language_code == "ru" else apod.title
     explanation = apod.explanation_ru if language_code == "ru" else apod.explanation

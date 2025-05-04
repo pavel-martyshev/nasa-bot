@@ -7,7 +7,7 @@ from aiogram_dialog.widgets.text import Format
 from dialogs.apod.getters.apod_menu import ApodProvider
 from dialogs.apod.handlers.apod_menu import on_random_apod
 from dialogs.common.widgets import back_to_main_menu
-from states import APODSG
+from states.states import APODSG
 
 apod_menu = Window(
     DynamicMedia("media", when=F["is_media_exist"]),

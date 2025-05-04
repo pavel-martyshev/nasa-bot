@@ -3,7 +3,7 @@ from aiogram_dialog.widgets.kbd import Start
 from aiogram_dialog.widgets.text import Format
 
 from dialogs.main_menu.getters.main_menu import getter
-from states import MainMenuSG, APODSG
+from states.states import MainMenuSG, APODSG
 
 main_menu = Window(
     Format("{main_menu_text}"),

@@ -3,7 +3,7 @@ from tortoise.fields import CharField, DateField, TextField
 from database.postgres.core.base_model import BaseModel
 
 
-class APOD(BaseModel):
+class APODModel(BaseModel):
     title = CharField(max_length=100, null=False, blank=False)
     title_ru = CharField(max_length=100, null=False, blank=False)
 

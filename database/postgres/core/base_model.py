@@ -6,7 +6,7 @@ from tortoise.fields import IntField, BigIntField, BooleanField
 
 class BaseModel(Model):
     id = IntField(primary_key=True)
-    crated_at = BigIntField(default=lambda: int(time.time()))
+    created_at = BigIntField(default=lambda: int(time.time()))
     is_deleted = BooleanField(default=False)
 
     class Meta:

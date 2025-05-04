@@ -171,3 +171,4 @@ cython_debug/
 .pypirc
 logs/
 temp/
+./database/postgres/migrations/

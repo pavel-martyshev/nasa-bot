@@ -5,7 +5,7 @@ from aiogram.types import TelegramObject
 from aiogram_dialog import DialogManager, StartMode
 
 from config.log_config import logger
-from states import ErrorDialog
+from states.states import ErrorDialog
 
 
 class ErrorCatchingMiddleware(BaseMiddleware):

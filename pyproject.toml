@@ -1,0 +1,4 @@
+[tool.aerich]
+tortoise_orm = "database.postgres.core.tortoise_config.TORTOISE_ORM"
+location = "./database/postgres/migrations"
+src_folder = "./."

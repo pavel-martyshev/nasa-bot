@@ -13,9 +13,10 @@ from config.log_config import logger
 from database.postgres.core import init_db
 from database.redis import storage
 from dialogs import apod_dialog, main_menu_dialog, error_dialog
-from states import MainMenuSG
+from states.states import MainMenuSG
 from utils.create_translator_hub import create_translator_hub
 from utils.middlewares.i18n import TranslatorRunnerMiddleware
+from utils.middlewares.user_activity_registration import UserActivityRegistrationMiddleware
 
 bot = Bot(app_settings.token)
 dp = Dispatcher(bot=bot, storage=storage)
@@ -48,6 +49,7 @@ async def main():
 
     translator_hub: TranslatorHub = create_translator_hub()
     dp.update.middleware(TranslatorRunnerMiddleware())
+    dp.update.middleware(UserActivityRegistrationMiddleware())
 
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
