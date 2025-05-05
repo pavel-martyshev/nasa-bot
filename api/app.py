@@ -22,10 +22,12 @@ app.add_middleware(
 )
 app.add_middleware(OriginFilterMiddleware)
 
+crud = APODCRUD()
+
 
 @app.get("/apodExplanation")
 async def apod_explanation(apod_id: int, language_code: str):
-    apod: PydanticModel = await APODCRUD.get(id=apod_id)
+    apod: PydanticModel = await crud.get(id=apod_id)
 
     title = apod.title_ru if language_code == "ru" else apod.title
     explanation = apod.explanation_ru if language_code == "ru" else apod.explanation
