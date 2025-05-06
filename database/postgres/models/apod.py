@@ -16,6 +16,7 @@ class APODModel(BaseModel):
     hdurl = CharField(max_length=150, null=True, blank=False)
 
     media_type = CharField(max_length=15, null=False, blank=False)
+    file_id = CharField(max_length=150, null=True, blank=False)
 
     class Meta:
         table = "apod"

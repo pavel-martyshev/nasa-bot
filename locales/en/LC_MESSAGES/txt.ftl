@@ -31,3 +31,5 @@ media_not_exist =
 unexpected_error =
     ⚠️ Something went wrong.
     Please return to the main menu and try again.
+
+loading_video = ⏳ Loading video, please wait

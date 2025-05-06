@@ -30,6 +30,6 @@ class UserActivityRegistrationMiddleware(BaseMiddleware):
             }
 
             user: PydanticModel = await user_crud.get_or_create(**crud_kwargs)
-            await user_crud.update(user.id, last_activity_time=int(time.time()))
+            await user_crud.update(filters={"id": user.id}, last_activity_time=int(time.time()))
 
         return await handler(event, data)

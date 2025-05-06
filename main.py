@@ -1,10 +1,11 @@
 import asyncio
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher
 from aiogram.filters import CommandStart
 from aiogram.methods import DeleteWebhook
 from aiogram.types import Message
 from aiogram_dialog import DialogManager, StartMode, setup_dialogs
+from aiogram_dialog.context.media_storage import MediaIdStorage
 from fluentogram import TranslatorHub
 from tortoise import Tortoise
 
@@ -15,6 +16,8 @@ from database.redis import storage
 from dialogs import apod_dialog, main_menu_dialog, error_dialog
 from states.states import MainMenuSG
 from utils.create_translator_hub import create_translator_hub
+from utils.custom_dialog_manager import CustomDialogManager
+from utils.custom_message_manager import CustomMessageManager
 from utils.middlewares.i18n import TranslatorRunnerMiddleware
 from utils.middlewares.user_activity_registration import UserActivityRegistrationMiddleware
 
@@ -55,7 +58,13 @@ async def main():
     dp.shutdown.register(on_shutdown)
 
     dp.include_routers(error_dialog, main_menu_dialog, apod_dialog)
-    setup_dialogs(dp)
+    setup_dialogs(
+        dp,
+        message_manager=CustomMessageManager(),
+        dialog_manager_factory=CustomDialogManager(
+            CustomMessageManager(),
+            MediaIdStorage()
+        ))
 
     await bot(DeleteWebhook(drop_pending_updates=True))
     await dp.start_polling(bot, _translator_hub=translator_hub)

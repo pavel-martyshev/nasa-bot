@@ -1,20 +1,21 @@
 from datetime import datetime
+from pathlib import Path
 from typing import Dict, Union, Any
 
 from aiogram.enums import ContentType
-from aiogram.types import User
+from aiogram.types import Update
 from aiogram_dialog import DialogManager
-from aiogram_dialog.api.entities import MediaAttachment
-import yt_dlp
+from aiogram_dialog.api.entities import MediaAttachment, MediaId
 from fluentogram import TranslatorRunner
 from tortoise.contrib.pydantic import PydanticModel
 from yarl import URL
-from yt_dlp import DownloadError
+from yt_dlp import DownloadError, YoutubeDL
 
 from config import app_settings
 from config.log_config import log_return_value, logger
 from database.postgres.core.CRUD.apod import APODCRUD
 from http_client.aiohttp_client import HttpClient
+from utils.enums.APODContentType import APODContentType
 
 
 class ApodProvider:
@@ -33,23 +34,40 @@ class ApodProvider:
         return app_settings.api.build_url(*self.__apod_url_parts, **query_params)
 
     @staticmethod
-    async def __get_apod_media(media_type: str, media_url: str, apod_date: str) -> Union[MediaAttachment, None]:
+    async def __get_apod_media(
+            media_type: str,
+            media_url: str,
+            apod_date: str,
+            dialog_manager: DialogManager,
+            event_update: Update,
+            i18n: TranslatorRunner
+    ) -> Union[MediaAttachment, None]:
         logger.info(f"APOD url at {apod_date}: {media_url}")
 
         if media_type == "image":
             media = MediaAttachment(ContentType.PHOTO, media_url)
         else:
+            await dialog_manager.event.bot.answer_callback_query(
+                callback_query_id=event_update.callback_query.id,
+                text=i18n.get("loading_video"),
+                cache_time=5
+            )
+
             ydl_opts = {
-                'format': 'best',
-                'quiet': True,
+                "format": "best[ext=mp4]/best",
+                "outtmpl": str(Path(app_settings.get_full_tmp_path(), "%(title)s.%(ext)s")),
+                "quiet": app_settings.quiet_download,
             }
 
             try:
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info = ydl.extract_info(media_url, download=False)
-                    media = MediaAttachment(ContentType.VIDEO, info.get("url", None))
+                with YoutubeDL(ydl_opts) as ydl:
+                    info = ydl.extract_info(media_url, download=True)
+                    filename = ydl.prepare_filename(info)
+                    logger.info(f"Saved to: {filename}")
             except DownloadError:
-                media = None
+                return None
+
+            media = MediaAttachment(ContentType.VIDEO, path=filename)
 
         return media
 
@@ -77,6 +95,7 @@ class ApodProvider:
                        dialog_manager: DialogManager,
                        i18n: TranslatorRunner,
                        language_code: str,
+                       event_update: Update,
                        **_):
         apod_date = dialog_manager.dialog_data.pop("apod_date", None)
         is_random = dialog_manager.dialog_data.pop("is_random", False)
@@ -87,17 +106,26 @@ class ApodProvider:
         apod: PydanticModel | None= await self.__apod_crud.get(date=apod_date)
 
         if apod:
-            media = await self.__get_apod_media(apod.media_type, apod.url, apod.date)
+            media: MediaAttachment = MediaAttachment(
+                APODContentType.get_aiogram_type(apod.media_type),
+                file_id=MediaId(file_id=apod.file_id)
+            )
         else:
             apod_data: Dict[str, Any] = await self.__get_apod_data(apod_date=apod_date, is_random=is_random)
             apod: PydanticModel = await self.__apod_crud.get_or_create(**apod_data)
-
-            media = await self.__get_apod_media(apod.media_type, apod.url, apod.date)
+            media = await self.__get_apod_media(
+                apod.media_type,
+                apod.url,
+                apod.date,
+                dialog_manager,
+                event_update,
+                i18n
+            )
 
         return {
             "apod_caption": i18n.get(
                 "apod_caption",
-                date=apod.date,
+                date=apod.date.strftime("%Y-%m-%d"),
                 title=apod.title_ru if language_code == "ru" else apod.title
             ),
             "media_not_exist_message": i18n.get("media_not_exist"),
@@ -106,7 +134,7 @@ class ApodProvider:
             "explanation_button_text": i18n.get("explanation"),
             "main_menu_button_text": i18n.get("main_menu"),
             "is_media_exist": bool(media),
-            "media": media,
+            "resources": media,
             "apod_id": apod.id,
             "language_code": language_code,
         }

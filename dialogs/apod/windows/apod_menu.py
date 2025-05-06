@@ -10,7 +10,7 @@ from dialogs.common.widgets import back_to_main_menu
 from states.states import APODSG
 
 apod_menu = Window(
-    DynamicMedia("media", when=F["is_media_exist"]),
+    DynamicMedia("resources", when=F["is_media_exist"]),
     Format("{apod_caption}", when=F["is_media_exist"]),
     Format("{media_not_exist_message}", when=~F["is_media_exist"]),
     SwitchTo(

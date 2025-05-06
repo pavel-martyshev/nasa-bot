@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from unittest import case
 
 from dotenv import load_dotenv
@@ -19,10 +20,18 @@ class AppSettings:
 
     Attributes:
         token: Telegram bot token.
+        resources_path: Path to static resource files (e.g., images, videos).
+        tmp_resources_path: Path to temporary files used during processing.
+        quiet_download: If True, suppresses download-related logs or messages (e.g., from youtube-dl).
+
         logs: Logging configuration settings.
+        db: Database configuration settings.
         api: API configuration settings.
     """
     token: str
+    resources_path: str
+    tmp_resources_path: str
+    quiet_download: bool
 
     logs: LogsSettings
     db: DatabaseSettings
@@ -31,12 +40,13 @@ class AppSettings:
     @staticmethod
     def get_date_format(language_code: str) -> str:
         match language_code:
-            case "en":
-                return "%m/%d/%Y"
             case "ru":
                 return "%d.%m.%Y"
             case _:
                 return "%m/%d/%Y"
+
+    def get_full_tmp_path(self) -> Path:
+        return Path(self.resources_path, self.tmp_resources_path)
 
 
 def load_settings() -> AppSettings:
@@ -48,6 +58,10 @@ def load_settings() -> AppSettings:
     """
     return AppSettings(
         token=os.getenv("TOKEN"),
+        resources_path=os.getenv("RESOURCES_PATH"),
+        tmp_resources_path=os.getenv("TMP_RESOURCES_PATH"),
+        quiet_download=bool(os.getenv("QUIET_DOWNLOAD")),
+
         logs=LogsSettings(
             level=os.getenv("LEVEL"),
             dir_name=os.getenv("DIR_NAME"),
@@ -57,6 +71,7 @@ def load_settings() -> AppSettings:
             time_rotating=os.getenv("TIME_ROTATING"),
             backup_count=int(os.getenv("BACKUP_COUNT")),
         ),
+
         db=DatabaseSettings(
             redis_host=os.getenv("REDIS_HOST"),
             redis_port=int(os.getenv("REDIS_PORT")),
@@ -67,6 +82,7 @@ def load_settings() -> AppSettings:
             postgres_password=os.getenv("POSTGRES_PASSWORD"),
             postgres_db_name=os.getenv("POSTGRES_DB_NAME"),
         ),
+
         api=APISettings(
             nasa_api_base_url=URL(os.getenv("NASA_API_BASE_URL")),
             nasa_api_key=os.getenv("NASA_API_KEY"),
