@@ -3,7 +3,7 @@ from typing import Dict, Union, Any, List
 from aiohttp import ClientResponse
 
 from config import app_settings
-from http_client.request_executor import request_executor
+from utils.http_client.request_executor import request_executor
 
 
 class HttpClient:

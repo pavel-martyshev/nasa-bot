@@ -20,7 +20,9 @@ class CustomDialogManager(DefaultManagerFactory):
         )
 
     def __call__(
-            self, event: ChatEvent, data: dict,
+            self,
+            event: ChatEvent,
+            data: dict,
             registry: DialogRegistryProtocol,
             router: Router,
     ) -> DialogManager:

@@ -10,9 +10,9 @@ from dialogs.common.widgets import back_to_main_menu
 from states.states import APODSG
 
 apod_menu = Window(
-    DynamicMedia("resources", when=F["is_media_exist"]),
-    Format("{apod_caption}", when=F["is_media_exist"]),
-    Format("{media_not_exist_message}", when=~F["is_media_exist"]),
+    DynamicMedia("resources", when=~F["media_not_exist_message"]),
+    Format("{apod_caption}", when=~F["media_not_exist_message"]),
+    Format("{media_not_exist_message}", when=F["media_not_exist_message"]),
     SwitchTo(
         Format("{select_date_button_text}"),
         state=APODSG.apod_date_selection,
@@ -27,6 +27,7 @@ apod_menu = Window(
         WebApp(
             text=Format("{explanation_button_text}"),
             url=Format("https://nasa-bot-web-app.ru?apod_id={apod_id}&language_code={language_code}"),
+            when=~F["media_not_exist_message"]
         ),
         back_to_main_menu,
     ),

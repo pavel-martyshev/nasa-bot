@@ -64,7 +64,8 @@ async def main():
         dialog_manager_factory=CustomDialogManager(
             CustomMessageManager(),
             MediaIdStorage()
-        ))
+        )
+    )
 
     await bot(DeleteWebhook(drop_pending_updates=True))
     await dp.start_polling(bot, _translator_hub=translator_hub)
