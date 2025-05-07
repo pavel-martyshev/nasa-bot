@@ -37,22 +37,13 @@ class ApodProvider:
     async def __get_apod_media(
             media_type: str,
             media_url: str,
-            apod_date: str,
-            dialog_manager: DialogManager,
-            event_update: Update,
-            i18n: TranslatorRunner
+            apod_date: str
     ) -> Union[MediaAttachment, None]:
         logger.info(f"APOD url at {apod_date}: {media_url}")
 
         if media_type == "image":
             media = MediaAttachment(ContentType.PHOTO, media_url)
         else:
-            # await dialog_manager.event.bot.answer_callback_query(
-            #     callback_query_id="8259161927286402817", # event_update.callback_query.id,
-            #     text=i18n.get("loading_video"),
-            #     cache_time=5
-            # )
-
             ydl_opts = {
                 "format": "best[ext=mp4]/best",
                 "outtmpl": str(Path(app_settings.get_full_tmp_path(), "%(title)s.%(ext)s")),
@@ -113,14 +104,7 @@ class ApodProvider:
         else:
             apod_data: Dict[str, Any] = await self.__get_apod_data(apod_date=apod_date, is_random=is_random)
             apod: PydanticModel = await self.__apod_crud.get_or_create(**apod_data)
-            media = await self.__get_apod_media(
-                apod.media_type,
-                apod.url,
-                apod.date,
-                dialog_manager,
-                event_update,
-                i18n
-            )
+            media = await self.__get_apod_media(apod.media_type, apod.url, apod.date)
 
         return {
             "apod_caption": i18n.get(
