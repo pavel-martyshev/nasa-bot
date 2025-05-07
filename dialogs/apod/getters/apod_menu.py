@@ -47,11 +47,11 @@ class ApodProvider:
         if media_type == "image":
             media = MediaAttachment(ContentType.PHOTO, media_url)
         else:
-            await dialog_manager.event.bot.answer_callback_query(
-                callback_query_id=event_update.callback_query.id,
-                text=i18n.get("loading_video"),
-                cache_time=5
-            )
+            # await dialog_manager.event.bot.answer_callback_query(
+            #     callback_query_id="8259161927286402817", # event_update.callback_query.id,
+            #     text=i18n.get("loading_video"),
+            #     cache_time=5
+            # )
 
             ydl_opts = {
                 "format": "best[ext=mp4]/best",
