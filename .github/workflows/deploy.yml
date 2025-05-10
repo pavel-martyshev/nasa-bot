@@ -15,6 +15,6 @@ jobs:
         run: |
           rsync -a . ${{ secrets.APP_DEPLOY_PATH }}
           cd ${{ secrets.APP_DEPLOY_PATH }}
-          source .venv/bin/activate
+          source venv/bin/activate
           pip install -r requirements.txt
           systemctl restart nasa-bot.service
