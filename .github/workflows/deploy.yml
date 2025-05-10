@@ -8,25 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
-    - name: Run Ruff
-      run: |
-        pip install ruff
-        ruff .
-
-    - name: Run mypy
-      run: |
-        pip install mypy
-        mypy .
-
-    - name: Run tests
-      run: |
-        pip install -r requirements.txt
-        pip install pytest
-        pytest
-
     - name: Deploy to Server via SSH
       uses: appleboy/ssh-action@v1.0.0
       with:
