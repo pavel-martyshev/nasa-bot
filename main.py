@@ -13,7 +13,7 @@ from config import app_settings
 from config.log_config import logger
 from database.postgres.core import init_db
 from database.redis import storage
-from dialogs import apod_dialog, main_menu_dialog, error_dialog
+from dialogs import apod_dialog, error_dialog, main_menu_dialog
 from states.states import MainMenuSG
 from utils.create_translator_hub import create_translator_hub
 from utils.custom_dialog_manager import CustomDialogManager
@@ -26,11 +26,11 @@ dp = Dispatcher(bot=bot, storage=storage)
 
 
 @dp.message(CommandStart())
-async def root_handler(_message: Message, dialog_manager: DialogManager):
+async def root_handler(_message: Message, dialog_manager: DialogManager) -> None:
     await dialog_manager.start(MainMenuSG.main_menu, mode=StartMode.RESET_STACK)
 
 
-async def on_startup():
+async def on_startup() -> None:
     """
     Function to be executed on bot startup.
     Logs the start of the bot.
@@ -38,7 +38,7 @@ async def on_startup():
     logger.warning("Bot started")
 
 
-async def on_shutdown():
+async def on_shutdown() -> None:
     """
     Function to be executed on bot shutdown.
     Logs the stop of the bot.
@@ -46,7 +46,7 @@ async def on_shutdown():
     logger.warning("Bot stopped")
 
 
-async def main():
+async def main() -> None:
     await init_db()
     await Tortoise.generate_schemas()
 
@@ -63,7 +63,7 @@ async def main():
         message_manager=CustomMessageManager(),
         dialog_manager_factory=CustomDialogManager(
             CustomMessageManager(),
-            MediaIdStorage()
+            MediaIdStorage()  # type: ignore[no-untyped-call]
         )
     )
 

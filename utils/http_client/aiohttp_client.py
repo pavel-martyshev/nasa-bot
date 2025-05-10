@@ -1,4 +1,4 @@
-from typing import Dict, Union, Any, List
+from typing import Any
 
 from aiohttp import ClientResponse
 
@@ -9,16 +9,16 @@ from utils.http_client.request_executor import request_executor
 class HttpClient:
     @staticmethod
     @request_executor()
-    async def get(response: ClientResponse, **_) -> Dict[str, Any]:
+    async def get(response: ClientResponse, *_: Any, **__: Any) -> Any:
         return await response.json()
 
     @staticmethod
     @request_executor(method="POST")
-    async def __execute_translation(response: ClientResponse, **_) -> Dict[str, Any]:
+    async def __execute_translation(response: ClientResponse, *_: Any, **__: Any) -> Any:
         return await response.json()
 
     @staticmethod
-    async def __prepare_translate_request(texts: str | List[str]) -> Dict[str, Union[str, Dict[str, str]]]:
+    async def __prepare_translate_request(texts: str | list[str]) -> dict[str, Any]:
         return {
             "url": app_settings.api.translate_api_url,
             "headers":{
@@ -34,5 +34,5 @@ class HttpClient:
         }
 
     @classmethod
-    async def translate(cls, *, texts: str | List[str]) -> Dict[str, Any]:
+    async def translate(cls, *, texts: str | list[str]) -> Any:
         return await cls.__execute_translation(**(await cls.__prepare_translate_request(texts)))

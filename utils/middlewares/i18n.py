@@ -1,4 +1,5 @@
-from typing import Any, Awaitable, Callable, Dict
+from collections.abc import Awaitable
+from typing import Any, Callable
 
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, User
@@ -12,9 +13,9 @@ class TranslatorRunnerMiddleware(BaseMiddleware):
 
     async def __call__(
             self,
-            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
             event: TelegramObject,
-            data: Dict[str, Any]
+            data: dict[str, Any]
     ) -> Any:
         """
         Middleware handler function.
@@ -27,7 +28,7 @@ class TranslatorRunnerMiddleware(BaseMiddleware):
         Returns:
             The result of the next handler.
         """
-        user: User = data.get("event_from_user")
+        user: User | None = data.get("event_from_user")
 
         if user:
             hub: TranslatorHub = data.get("_translator_hub")

@@ -8,9 +8,11 @@ class APODContentType(Enum):
     VIDEO = "video"
 
     @classmethod
-    def get_aiogram_type(cls, apod_type: str) -> ContentType | None:
-        if apod_type == cls.IMAGE.value:
-            return ContentType.PHOTO
-
-        if apod_type == cls.VIDEO.value:
-            return ContentType.VIDEO
+    def get_aiogram_type(cls, apod_type: str) -> ContentType:
+        match apod_type:
+            case cls.IMAGE.value:
+                return ContentType.PHOTO
+            case cls.VIDEO.value:
+                return ContentType.VIDEO
+            case _:
+                return ContentType.UNKNOWN

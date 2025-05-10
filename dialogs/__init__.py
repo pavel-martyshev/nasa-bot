@@ -1,8 +1,8 @@
 from aiogram_dialog import Dialog
 
+from dialogs.apod import apod_date_selection, apod_menu
 from dialogs.error_dialog.windows.error_window import error_window
 from dialogs.main_menu import main_menu
-from dialogs.apod import apod_menu, apod_date_selection
 from utils.middlewares.error_catching import ErrorCatchingMiddleware
 
 error_dialog = Dialog(

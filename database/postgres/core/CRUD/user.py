@@ -1,7 +1,6 @@
-from typing import Type
+from typing import Any
 
 from tortoise.contrib.pydantic import PydanticModel
-from tortoise.models import MODEL
 
 from database.postgres.core.CRUD.base_crud import BaseCrud
 from database.postgres.models.user import UserModel
@@ -10,14 +9,14 @@ from utils.enums.Schema import Schema
 
 class UserCRUD(BaseCrud):
     @property
-    def _model(self) -> Type[MODEL]:
+    def _model(self) -> type[UserModel]:
         return UserModel
 
     @property
     def _schema(self) -> Schema:
         return Schema.UserSchema
 
-    async def get_or_create(self, **kwargs) -> PydanticModel | None:
+    async def get_or_create(self, **kwargs: Any) -> PydanticModel | None:
         user: UserModel | None = await UserModel.get_or_none(telegram_id=kwargs.get("telegram_id"))
 
         if not user:

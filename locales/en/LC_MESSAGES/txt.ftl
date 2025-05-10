@@ -22,7 +22,7 @@ date_request =
 
 incorrect_date = ⚠️ Incorrect date
 
-incorrect_format = ⚠️ Некорректный формат
+incorrect_format = ⚠️ Incorrect format
 
 media_not_exist =
     😞 Unfortunately, the data for this date is currently unavailable.

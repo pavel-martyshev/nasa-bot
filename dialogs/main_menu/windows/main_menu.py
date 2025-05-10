@@ -1,9 +1,9 @@
-from aiogram_dialog import Window, StartMode
+from aiogram_dialog import StartMode, Window
 from aiogram_dialog.widgets.kbd import Start
 from aiogram_dialog.widgets.text import Format
 
 from dialogs.main_menu.getters.main_menu import getter
-from states.states import MainMenuSG, APODSG
+from states.states import APODSG, MainMenuSG
 
 main_menu = Window(
     Format("{main_menu_text}"),

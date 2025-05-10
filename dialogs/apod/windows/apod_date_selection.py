@@ -6,12 +6,12 @@ from aiogram_dialog.widgets.kbd import Back
 from aiogram_dialog.widgets.text import Format
 
 from dialogs.apod.getters.apod_date_selection import getter
-from dialogs.apod.handlers.apod_date_selection import handle_selected_date, handle_incorrect_message
+from dialogs.apod.handlers.apod_date_selection import handle_incorrect_message, handle_selected_date
 from states.states import APODSG
 
 apod_date_selection = Window(
     Format("{incorrect_format_message}" + "\n\n", when=F["incorrect_format"]),
-    Format("{incorrect_date_message}", when=F["incorrect_date"]),
+    Format("{incorrect_date_message}" + "\n\n", when=F["incorrect_date"]),
     Format("{date_request}"),
     MessageInput(
         content_types=ContentType.TEXT,

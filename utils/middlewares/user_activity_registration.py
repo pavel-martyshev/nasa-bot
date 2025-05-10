@@ -1,5 +1,6 @@
 import time
-from typing import Callable, Dict, Any, Awaitable
+from collections.abc import Awaitable
+from typing import Any, Callable
 
 from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, User
@@ -13,9 +14,9 @@ user_crud = UserCRUD()
 class UserActivityRegistrationMiddleware(BaseMiddleware):
     async def __call__(
             self,
-            handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
             event: TelegramObject,
-            data: Dict[str, Any]
+            data: dict[str, Any]
     ) -> Any:
         event_from_user: User = data["event_from_user"]
 
@@ -29,7 +30,7 @@ class UserActivityRegistrationMiddleware(BaseMiddleware):
                 "last_activity_time": int(time.time()),
             }
 
-            user: PydanticModel = await user_crud.get_or_create(**crud_kwargs)
-            await user_crud.update(filters={"id": user.id}, last_activity_time=int(time.time()))
+            user: PydanticModel | None = await user_crud.get_or_create(**crud_kwargs)
+            await user_crud.update(filters={"id": user.id}, last_activity_time=int(time.time()))  # type: ignore[union-attr]
 
         return await handler(event, data)

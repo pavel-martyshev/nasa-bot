@@ -1,13 +1,13 @@
-import os
-import sys
 import logging
 import logging.config
+import os
+import sys
 import traceback
 from functools import wraps
 from inspect import iscoroutinefunction
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
-from typing import Callable
+from typing import Any
 
 from icecream import install
 
@@ -49,7 +49,7 @@ logger.addHandler(logs_file_handler)
 logger.addHandler(logs_stream_handler)
 
 
-def exception_handler(exc_type, exc_value, exc_traceback) -> None:
+def exception_handler(exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
     """
     Logs uncaught exceptions with full traceback information.
     This handler ignores KeyboardInterrupt to allow clean shutdowns.
@@ -73,7 +73,7 @@ def exception_handler(exc_type, exc_value, exc_traceback) -> None:
 sys.excepthook = exception_handler
 
 
-def log_return_value(method: Callable) -> Callable:
+def log_return_value(method: Any) -> Any:
     """
     Decorator to log the return value of a function.
 
@@ -89,14 +89,14 @@ def log_return_value(method: Callable) -> Callable:
     log_message = "Function {method_name} returned: {result}"
 
     @wraps(method)
-    async def async_wrapper(*args, **kwargs) -> Callable:
+    async def async_wrapper(*args: Any, **kwargs: dict[Any, Any]) -> Any:
         result = await method(*args, **kwargs)
         logger.info(log_message.format(method_name=method.__name__, result=result))
 
         return result
 
     @wraps(method)
-    def wrapper(*args, **kwargs) -> Callable:
+    def wrapper(*args: Any, **kwargs: dict[Any, Any]) -> Any:
         result = method(*args, **kwargs)
         logger.info(log_message.format(method_name=method.__name__, result=result))
 

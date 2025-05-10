@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 from yarl import URL
 
@@ -17,14 +18,32 @@ class APISettings:
     nasa_api_base_url: URL
     nasa_api_key: str
 
-    translate_api_url: str
+    translate_api_url: URL
     translate_api_key: str
     folder_id: str
 
     bot_api_host: str
     bot_api_port: int
 
-    def build_url(self, *args, **kwargs) -> URL:
+    def __post_init__(self) -> None:
+        error_message = "{argument_name} must be set"
+
+        if not self.nasa_api_base_url:
+            raise KeyError(error_message.format(argument_name="nasa_api_base_url"))
+
+        if not self.nasa_api_key:
+            raise KeyError(error_message.format(argument_name="nasa_api_key"))
+
+        if not self.translate_api_url:
+            raise KeyError(error_message.format(argument_name="translate_api_url"))
+
+        if not self.translate_api_key:
+            raise KeyError(error_message.format(argument_name="translate_api_key"))
+
+        if not self.folder_id:
+            raise KeyError(error_message.format(argument_name="folder_id"))
+
+    def build_url(self, *args: str, **kwargs: Any) -> URL:
         """
         Build a full API URL by joining base URL with additional path parts and optional query parameters.
 

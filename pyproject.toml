@@ -2,3 +2,13 @@
 tortoise_orm = "database.postgres.core.tortoise_config.TORTOISE_ORM"
 location = "./database/postgres/migrations"
 src_folder = "./."
+
+[tool.ruff]
+select = ["F", "E", "W", "I", "UP"]
+ignore = []
+line-length = 120
+exclude = ["migrations", ".venv"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "-ra --strict-markers"

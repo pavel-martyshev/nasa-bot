@@ -1,11 +1,12 @@
 import re
 from datetime import datetime
+from typing import cast
 
 from aiogram import Bot
 from aiogram.enums import ContentType
-from aiogram.types import Message
+from aiogram.types import InlineKeyboardMarkup, Message
 from aiogram_dialog.api.entities import NewMessage, OldMessage
-from aiogram_dialog.manager.message_manager import SEND_METHODS, MessageManager, INPUT_MEDIA_TYPES
+from aiogram_dialog.manager.message_manager import INPUT_MEDIA_TYPES, SEND_METHODS, MessageManager
 from babel.dates import format_date
 
 from config.log_config import logger
@@ -18,22 +19,25 @@ class CustomMessageManager(MessageManager):
     __language_code: str
     __apod_crud: APODCRUD = APODCRUD()
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.__language_code = "en"
 
     @property
-    def language_code(self):
+    def language_code(self) -> str:
         return self.__language_code
 
     @language_code.setter
-    def language_code(self, value):
+    def language_code(self, value: str) -> None:
         self.__language_code = value
 
-    async def __save_file_id(self, message: Message, date: datetime):
+    async def __save_file_id(self, message: Message, date: datetime) -> None:
         media_content_type = message.content_type
 
         if media_content_type == ContentType.PHOTO:
+            if not message.photo:
+                raise ValueError("Photo is None")
+
             file_id = message.photo[-1].file_id
         else:
             file_id = getattr(message, media_content_type).file_id
@@ -42,13 +46,20 @@ class CustomMessageManager(MessageManager):
             await self.__apod_crud.update(filters={"date": date}, file_id=file_id)
             logger.debug(f"Saved file_id for date {date.strftime('%Y-%m-%d')}")
 
-    def __get_date_with_formatting_date_caption(self, text: str) -> (datetime, str):
-        date_string = re.search(_DATE_PATTERN, text).group()
-        date = datetime.strptime(date_string, "%Y-%m-%d")
+    def __get_date_with_formatting_date_caption(self, text: str) -> tuple[datetime, str]:
+        match = re.search(_DATE_PATTERN, text)
+
+        if not match:
+            raise ValueError("Date format is invalid")
+
+        date = datetime.strptime(match.group(), "%Y-%m-%d")
 
         return date, re.sub(_DATE_PATTERN, format_date(date, format="long", locale=self.__language_code), text)
 
     async def send_media(self, bot: Bot, new_message: NewMessage) -> Message:
+        if not new_message.media:
+            raise ValueError("There is no media in the message.")
+
         logger.debug(
             "send_media to %s, media_id: %s",
             new_message.chat,
@@ -60,7 +71,11 @@ class CustomMessageManager(MessageManager):
                 f"ContentType {new_message.media.type} is not supported",
             )
 
-        date, caption = self.__get_date_with_formatting_date_caption(new_message.text)
+        date = None
+        caption: str | None = new_message.text
+
+        if new_message.text:
+            date, caption = self.__get_date_with_formatting_date_caption(new_message.text)
 
         media_message: Message = await method(
             new_message.chat.id,
@@ -73,20 +88,28 @@ class CustomMessageManager(MessageManager):
             **new_message.media.kwargs,
         )
 
-        await self.__save_file_id(media_message, date)
+        if date:
+            await self.__save_file_id(media_message, date)
 
         return media_message
 
     async def edit_media(
             self, bot: Bot, new_message: NewMessage, old_message: OldMessage,
     ) -> Message:
+        if not new_message.media:
+            raise ValueError("There is no media in the message.")
+
         logger.debug(
             "edit_media to %s, media_id: %s",
             new_message.chat,
             new_message.media.file_id,
         )
 
-        date, caption = self.__get_date_with_formatting_date_caption(new_message.text)
+        date = None
+        caption: str | None = new_message.text
+
+        if new_message.text:
+            date, caption = self.__get_date_with_formatting_date_caption(new_message.text)
 
         media = INPUT_MEDIA_TYPES[new_message.media.type](
             caption=caption,
@@ -100,9 +123,12 @@ class CustomMessageManager(MessageManager):
             message_id=old_message.message_id,
             chat_id=old_message.chat.id,
             media=media,
-            reply_markup=new_message.reply_markup,
+            reply_markup=cast(InlineKeyboardMarkup, new_message.reply_markup),
         )
 
-        await self.__save_file_id(media_message, date)
+        assert isinstance(media_message, Message)
+
+        if date:
+            await self.__save_file_id(media_message, date)
 
         return media_message

@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import cast
 
 from aiogram.types import Message
 from aiogram_dialog import DialogManager
@@ -9,8 +10,11 @@ from config.log_config import logger
 from states.states import APODSG
 
 
-async def handle_selected_date(message: Message, _widget: MessageInput, dialog_manager: DialogManager):
-    language_code: str = dialog_manager.middleware_data.get("language_code")
+async def handle_selected_date(message: Message, _widget: MessageInput, dialog_manager: DialogManager) -> None:
+    language_code: str = cast(str, dialog_manager.middleware_data.get("language_code"))
+
+    if not message.text:
+        raise ValueError("Message text is empty")
 
     try:
         date = datetime.strptime(
@@ -28,5 +32,5 @@ async def handle_selected_date(message: Message, _widget: MessageInput, dialog_m
     await dialog_manager.switch_to(APODSG.apod_menu)
 
 
-async def handle_incorrect_message(_message: Message, _widget: MessageInput, dialog_manager: DialogManager):
+async def handle_incorrect_message(_message: Message, _widget: MessageInput, dialog_manager: DialogManager) -> None:
     dialog_manager.dialog_data.update(incorrect_format=True)

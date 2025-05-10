@@ -1,33 +1,34 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Union, Any
+from typing import Any, Union, cast
 
 from aiogram.enums import ContentType
 from aiogram_dialog import DialogManager
 from aiogram_dialog.api.entities import MediaAttachment, MediaId
 from fluentogram import TranslatorRunner
-from tortoise.contrib.pydantic import PydanticModel
 from yarl import URL
 from yt_dlp import DownloadError, YoutubeDL
 
 from config import app_settings
-from config.log_config import logger
+from config.log_config import log_return_value, logger
 from database.postgres.core.CRUD.apod import APODCRUD
-from utils.http_client import HttpClient
+from database.postgres.core.protocols import APODProtocol
 from utils.enums.APODContentType import APODContentType
+from utils.http_client import HttpClient
 
 
 class ApodProvider:
-    __apod_url_parts: (str, str) = "planetary", "apod"
+    __apod_url_parts: tuple[str, str] = "planetary", "apod"
     __apod_crud: APODCRUD = APODCRUD()
 
+    @log_return_value
     def __get_apod_url(self, apod_date: str | None, is_random: bool) -> URL:
         query_params = {"api_key": app_settings.api.nasa_api_key}
 
         if apod_date:
             query_params["date"] = apod_date
         elif is_random:
-            query_params["count"] = 1
+            query_params["count"] = "1"
 
         return app_settings.api.build_url(*self.__apod_url_parts, **query_params)
 
@@ -61,7 +62,7 @@ class ApodProvider:
         return media
 
     @staticmethod
-    async def __prepare_payload(data: Dict[str, Any]) -> Dict[str, Any]:
+    async def __prepare_payload(data: dict[str, Any]) -> dict[str, Any]:
         data.pop("copyright", None)
         data.pop("service_version", None)
 
@@ -72,39 +73,41 @@ class ApodProvider:
 
         return data
 
-    async def __get_apod_data(self, apod_date: str | None, is_random: bool) -> Dict[str, Any]:
-        apod_json: Dict[str, Any] = await HttpClient.get(url=self.__get_apod_url(apod_date, is_random))
+    async def __get_apod_data(self, apod_date: str | None, is_random: bool) -> dict[str, Any]:
+        apod_json: dict[str, Any] = await HttpClient.get(url=self.__get_apod_url(apod_date, is_random))
 
         if isinstance(apod_json, list):
             apod_json = apod_json[0]
 
         return await self.__prepare_payload(apod_json)
 
-    async def __call__(self,
-                       dialog_manager: DialogManager,
-                       i18n: TranslatorRunner,
-                       language_code: str,
-                       **_):
+    async def __call__(
+            self,
+            dialog_manager: DialogManager,
+            i18n: TranslatorRunner,
+            language_code: str,
+            **_: Any
+    ) -> dict[str, Any]:
         apod_date = dialog_manager.dialog_data.pop("apod_date", None)
         is_random = dialog_manager.dialog_data.pop("is_random", False)
 
         if not apod_date and not is_random:
             apod_date = datetime.today().strftime("%Y-%m-%d")
 
-        apod: PydanticModel | None = await self.__apod_crud.get(date=apod_date)
+        apod: APODProtocol | None = cast(APODProtocol | None, await self.__apod_crud.get(date=apod_date))
 
         if apod:
             if not apod.file_id:
                 media: MediaAttachment | None = None
             else:
-                media: MediaAttachment = MediaAttachment(
+                media = MediaAttachment(
                     APODContentType.get_aiogram_type(apod.media_type),
                     file_id=MediaId(file_id=apod.file_id)
                 )
         else:
-            apod_data: Dict[str, Any] = await self.__get_apod_data(apod_date=apod_date, is_random=is_random)
-            apod: PydanticModel = await self.__apod_crud.get_or_create(**apod_data)
-            media: MediaAttachment | None = await self.__get_apod_media(apod.media_type, apod.url, apod.date)
+            apod_data: dict[str, Any] = await self.__get_apod_data(apod_date=apod_date, is_random=is_random)
+            apod = cast(APODProtocol, await self.__apod_crud.get_or_create(**apod_data))
+            media = await self.__get_apod_media(apod.media_type, apod.url, apod.date.strftime("%Y-%m-%d"))
 
         result = {
             "select_date_button_text": i18n.get("select_date"),

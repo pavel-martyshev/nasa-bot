@@ -1,6 +1,6 @@
 from aiogram import F
 from aiogram_dialog import Window
-from aiogram_dialog.widgets.kbd import SwitchTo, Button, Row, WebApp
+from aiogram_dialog.widgets.kbd import Button, Row, SwitchTo, WebApp
 from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Format
 

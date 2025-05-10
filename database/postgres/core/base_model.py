@@ -1,7 +1,7 @@
 import time
 
 from tortoise import Model
-from tortoise.fields import IntField, BigIntField, BooleanField
+from tortoise.fields import BigIntField, BooleanField, IntField
 
 
 class BaseModel(Model):

@@ -1,4 +1,4 @@
-from tortoise.fields import CharField, IntField, BigIntField
+from tortoise.fields import BigIntField, CharField, IntField
 
 from database.postgres.core.base_model import BaseModel
 

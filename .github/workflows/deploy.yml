@@ -1,0 +1,41 @@
+name: Manual Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run Ruff
+      run: |
+        pip install ruff
+        ruff .
+
+    - name: Run mypy
+      run: |
+        pip install mypy
+        mypy .
+
+    - name: Run tests
+      run: |
+        pip install -r requirements.txt
+        pip install pytest
+        pytest
+
+    - name: Deploy to Server via SSH
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          cd ${{ secrets.APP_DEPLOY_PATH }}
+          git pull
+          source .venv/bin/activate
+          pip install -r requirements.txt
+          systemctl restart nasa-bot.service
