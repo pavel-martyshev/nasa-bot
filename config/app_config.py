@@ -9,7 +9,10 @@ from config.api_settings import APISettings
 from config.database_settings import DatabaseSettings
 from config.logs_settings import LogsSettings
 
-load_dotenv()
+if os.path.exists(".env"):
+    load_dotenv(".env")
+else:
+    load_dotenv(".env.example")
 
 
 @dataclass
