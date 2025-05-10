@@ -2,12 +2,13 @@ from collections import namedtuple
 from collections.abc import AsyncGenerator
 from datetime import date, datetime
 from typing import Any
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from aiogram_dialog.api.entities import MediaAttachment
 from fluentogram import TranslatorHub
 from yarl import URL
+from yt_dlp import DownloadError
 
 from config import app_settings
 from database.postgres.models.apod import APODModel
@@ -168,6 +169,7 @@ class TestMenu:
             f"Дата: *\u2068{today}\u2069*\n\n\u2068Тестовый заголовок\u2069"
         )
 
+    @patch("dialogs.apod.getters.apod_menu.YoutubeDL")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
     @pytest.mark.asyncio
@@ -175,8 +177,15 @@ class TestMenu:
             self,
             mock_get: AsyncMock,
             mock_translate: AsyncMock,
+            mock_yt_dlp: MagicMock,
             translator_hub: TranslatorHub
     ) -> None:
+        mock_ydl_instance = MagicMock()
+        mock_yt_dlp.return_value.__enter__.return_value = mock_ydl_instance
+
+        mock_ydl_instance.extract_info.return_value = {"title": "test_video"}
+        mock_ydl_instance.prepare_filename.return_value = "tests/static/test_video.mp4"
+
         await self._test_available_video_or_image(
             mock_get,
             mock_translate,
@@ -202,6 +211,7 @@ class TestMenu:
             "Дата: *\u20682025-05-06\u2069*\n\n\u2068Тестовый заголовок\u2069"
         )
 
+    @patch("dialogs.apod.getters.apod_menu.YoutubeDL")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
     @pytest.mark.asyncio
@@ -209,8 +219,14 @@ class TestMenu:
             self,
             mock_get: AsyncMock,
             mock_translate: AsyncMock,
+            mock_yt_dlp: MagicMock,
             translator_hub: TranslatorHub
     ) -> None:
+        mock_ydl_instance = MagicMock()
+        mock_yt_dlp.return_value.__enter__.return_value = mock_ydl_instance
+
+        mock_ydl_instance.extract_info.side_effect = DownloadError("fail")
+
         await self._test_unavailable_video(
             mock_get,
             mock_translate,
@@ -305,6 +321,7 @@ class TestMenu:
             f"Date: *\u2068{today}\u2069*\n\n\u2068Test title\u2069"
         )
 
+    @patch("dialogs.apod.getters.apod_menu.YoutubeDL")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
     @pytest.mark.asyncio
@@ -312,8 +329,15 @@ class TestMenu:
             self,
             mock_get: AsyncMock,
             mock_translate: AsyncMock,
+            mock_yt_dlp: MagicMock,
             translator_hub: TranslatorHub
     ) -> None:
+        mock_ydl_instance = MagicMock()
+        mock_yt_dlp.return_value.__enter__.return_value = mock_ydl_instance
+
+        mock_ydl_instance.extract_info.return_value = {"title": "test_video"}
+        mock_ydl_instance.prepare_filename.return_value = "tests/static/test_video.mp4"
+
         await self._test_available_video_or_image(
             mock_get,
             mock_translate,
@@ -339,6 +363,7 @@ class TestMenu:
             "Date: *\u20682025-05-06\u2069*\n\n\u2068Test title\u2069"
         )
 
+    @patch("dialogs.apod.getters.apod_menu.YoutubeDL")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
     @pytest.mark.asyncio
@@ -346,8 +371,14 @@ class TestMenu:
             self,
             mock_get: AsyncMock,
             mock_translate: AsyncMock,
+            mock_yt_dlp: MagicMock,
             translator_hub: TranslatorHub
     ) -> None:
+        mock_ydl_instance = MagicMock()
+        mock_yt_dlp.return_value.__enter__.return_value = mock_ydl_instance
+
+        mock_ydl_instance.extract_info.side_effect = DownloadError("fail")
+
         await self._test_unavailable_video(
             mock_get,
             mock_translate,

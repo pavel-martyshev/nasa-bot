@@ -9,10 +9,12 @@ from config.api_settings import APISettings
 from config.database_settings import DatabaseSettings
 from config.logs_settings import LogsSettings
 
-if os.path.exists(".env"):
-    load_dotenv(".env")
+SOURCE_PATH = Path(__file__).parent.parent
+
+if os.path.exists(Path.joinpath(SOURCE_PATH, ".env")):
+    load_dotenv(Path.joinpath(SOURCE_PATH, ".env"))
 else:
-    load_dotenv(".env.example")
+    load_dotenv(Path.joinpath(SOURCE_PATH, ".env.example"))
 
 
 @dataclass
