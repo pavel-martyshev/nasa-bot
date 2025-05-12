@@ -15,6 +15,15 @@ def request_executor(method: str = "GET") -> Callable[
     Awaitable[R]]],
     Callable[..., Awaitable[R]]
 ]:
+    """
+    Wrap an HTTP request function with aiohttp session and error handling.
+
+    Args:
+        method (str): HTTP method to use (default: "GET").
+
+    Returns:
+        Callable: Decorator that injects a ClientResponse into the wrapped function.
+    """
     def decorator(func: Callable[[ClientResponse, Any], Awaitable[R]]) -> Callable[..., Awaitable[R]]:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:

@@ -4,10 +4,10 @@ from fluentogram import FluentTranslator, TranslatorHub
 
 def create_translator_hub() -> TranslatorHub:
     """
-    Create a TranslatorHub instance with specified translators and locales.
+    Initialize and return a TranslatorHub with Russian and English translators.
 
     Returns:
-        TranslatorHub: The initialized TranslatorHub instance.
+        TranslatorHub: Configured translation hub with locale mappings and Fluent translators.
     """
     translator_hub = TranslatorHub(
         {

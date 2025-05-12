@@ -27,26 +27,36 @@ dp = Dispatcher(bot=bot, storage=storage)
 
 @dp.message(CommandStart())
 async def root_handler(_message: Message, dialog_manager: DialogManager) -> None:
+    """
+    Handle /start command by launching the main menu dialog.
+
+    Args:
+        _message (Message): Incoming Telegram message (unused).
+        dialog_manager (DialogManager): Dialog manager instance.
+    """
     await dialog_manager.start(MainMenuSG.main_menu, mode=StartMode.RESET_STACK)
 
 
 async def on_startup() -> None:
     """
-    Function to be executed on bot startup.
-    Logs the start of the bot.
+    Executed when the bot starts. Logs the startup event.
     """
     logger.warning("Bot started")
 
 
 async def on_shutdown() -> None:
     """
-    Function to be executed on bot shutdown.
-    Logs the stop of the bot.
+    Executed when the bot stops. Logs the shutdown event.
     """
     logger.warning("Bot stopped")
 
 
 async def main() -> None:
+    """
+    Main entry point for the bot.
+
+    Initializes the database, sets up middleware, dialogs, routers, and starts polling.
+    """
     await init_db()
     await Tortoise.generate_schemas()
 

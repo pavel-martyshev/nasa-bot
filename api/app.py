@@ -6,29 +6,39 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse, Response
 
-from api.origin_filter_middleware import ALLOWED_ORIGINS, OriginFilterMiddleware
+from api.origin_filter_middleware import AllowedOriginsMiddleware
 from config import app_settings
 from database.postgres.core import init_db
-from database.postgres.core.CRUD.apod import APODCRUD
-from database.postgres.core.protocols import APODProtocol
+from database.postgres.core.CRUD.apod import ApodCrud
+from database.postgres.core.protocols import ApodProtocol
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=app_settings.allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(OriginFilterMiddleware)
+app.add_middleware(AllowedOriginsMiddleware)
 
-crud = APODCRUD()
+crud = ApodCrud()
 
 
 @app.get("/apodExplanation")
 async def apod_explanation(apod_id: int, language_code: str) -> Response:
-    apod = cast(APODProtocol | None, await crud.get(id=apod_id))
+    """
+    Retrieve APOD title and explanation in the specified language.
+
+    Args:
+        apod_id (int): ID of the APOD entry to fetch.
+        language_code (str): Language code ("ru" for Russian, anything else for English).
+
+    Returns:
+        Response: JSON with title and explanation, or 404 if not found.
+    """
+    apod = cast(ApodProtocol | None, await crud.get(id=apod_id))
 
     if not apod:
         return JSONResponse(status_code=404, content={"detail": "APOD not found"})

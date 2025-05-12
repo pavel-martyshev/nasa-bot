@@ -11,7 +11,7 @@ from yarl import URL
 from yt_dlp import DownloadError
 
 from config import app_settings
-from database.postgres.models.apod import APODModel
+from database.postgres.models.apod import ApodModel
 from dialogs.apod.getters.apod_menu import ApodProvider
 from tests.utils.factories.dialog_manager_factory import DialogManagerFactory
 
@@ -438,7 +438,7 @@ class TestMenu:
         }
 
         await ApodProvider()(dialog_manager_factory.dialog_manager, **middleware_data)
-        apod = await APODModel.get_or_none(date="2025-05-05")
+        apod = await ApodModel.get_or_none(date="2025-05-05")
 
         assert apod is not None
         assert apod.title == "Test title"
@@ -453,9 +453,9 @@ class TestMenu:
 
         await ApodProvider()(dialog_manager_factory.dialog_manager, **middleware_data)
 
-        assert await APODModel.all().count() == 1
+        assert await ApodModel.all().count() == 1
 
-        apod = await APODModel.get_or_none(date="2025-05-05")
+        apod = await ApodModel.get_or_none(date="2025-05-05")
         apod.file_id = "abc123"
         await apod.save()
 

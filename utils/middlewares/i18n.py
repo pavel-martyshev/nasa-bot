@@ -8,7 +8,7 @@ from fluentogram import TranslatorHub
 
 class TranslatorRunnerMiddleware(BaseMiddleware):
     """
-    Middleware for adding a translator runner to the event data based on the user's locale.
+    Middleware that injects a TranslatorRunner into event data based on user's locale.
     """
 
     async def __call__(
@@ -18,15 +18,15 @@ class TranslatorRunnerMiddleware(BaseMiddleware):
             data: dict[str, Any]
     ) -> Any:
         """
-        Middleware handler function.
+        Add translator and language code to context data for localization support.
 
         Args:
-            handler: The next handler to call.
-            event: The current Telegram event.
-            data: The data dictionary for the current context.
+            handler (Callable): Next handler in the middleware chain.
+            event (TelegramObject): Incoming Telegram event.
+            data (dict[str, Any]): Contextual data for the event.
 
         Returns:
-            The result of the next handler.
+            Any: Result from the next handler.
         """
         user: User | None = data.get("event_from_user")
 

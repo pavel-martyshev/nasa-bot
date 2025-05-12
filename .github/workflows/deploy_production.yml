@@ -1,0 +1,48 @@
+name: Deploy production
+
+on:
+  workflow_run:
+    workflows: [ "CI production" ]
+    types:
+      - completed
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_commit.message, 'Release v')
+
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy to Server via SSH
+        run: |
+          rsync -a . ${{ secrets.APP_DEPLOY_PATH }}
+          cd ${{ secrets.APP_DEPLOY_PATH }}
+          source venv/bin/activate
+          pip install -r requirements.txt
+          sudo systemctl restart nasa-bot.service
+          sudo systemctl restart nasa-bot-api.service
+
+      - name: Check for ORM model changes
+        id: models_changed
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q 'database/postgres/models/' || \
+             git diff --name-only HEAD~1 HEAD | grep -q 'database/postgres/core/base_model.py'; then
+            echo "models_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "models_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run Aerich migrations
+        if: steps.models_changed.outputs.models_changed == 'true'
+        run: |
+          cd ${{ secrets.APP_DEPLOY_PATH }}
+          source .venv/bin/activate
+          aerich migrate
+          aerich upgrade

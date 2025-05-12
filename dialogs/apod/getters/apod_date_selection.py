@@ -8,6 +8,18 @@ from config import app_settings
 
 
 async def getter(dialog_manager: DialogManager, i18n: TranslatorRunner, language_code: str, **_: Any) -> dict[str, Any]:
+    """
+    Prepare localized data for rendering a dialog step.
+
+    Args:
+        dialog_manager (DialogManager): Manages dialog state and context.
+        i18n (TranslatorRunner): Translator for localized text.
+        language_code (str): Current user language.
+        **_ (unused): Ignored additional arguments.
+
+    Returns:
+        dict[str, Any]: Dictionary with localized strings for the UI, including optional error messages.
+    """
     result = {
         "date_request": i18n.get(
             "date_request",

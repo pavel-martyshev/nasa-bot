@@ -11,6 +11,11 @@ from utils.custom_message_manager import CustomMessageManager
 
 
 class CustomDialogManager(DefaultManagerFactory):
+    """
+    Custom dialog manager factory that injects language code into the message manager.
+
+    Extends DefaultManagerFactory to customize dialog behavior per language.
+    """
     def __init__(
             self,
             message_manager: CustomMessageManager,
@@ -28,6 +33,18 @@ class CustomDialogManager(DefaultManagerFactory):
             registry: DialogRegistryProtocol,
             router: Router,
     ) -> DialogManager:
+        """
+        Create a DialogManager instance with injected language-aware message manager.
+
+        Args:
+            event (ChatEvent): Incoming chat event.
+            data (dict[str, Any]): Contextual data, must include 'language_code'.
+            registry (DialogRegistryProtocol): Dialog registry.
+            router (Router): Bot router instance.
+
+        Returns:
+            DialogManager: Initialized dialog manager with localization support.
+        """
         self.message_manager.language_code = data["language_code"]  # type: ignore[attr-defined]
 
         return ManagerImpl(

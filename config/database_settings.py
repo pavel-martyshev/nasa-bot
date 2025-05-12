@@ -4,17 +4,18 @@ from dataclasses import dataclass
 @dataclass
 class DatabaseSettings:
     """
-    Settings for database configurations (e.g., Postgres).
+    Holds connection settings for Redis and Postgres databases.
 
     Attributes:
-        redis_host: Redis host name.
-        redis_port: Redis port.
-        redis_db_number: Redis database number.
+        redis_host (str): Redis host name.
+        redis_port (int): Redis port.
+        redis_db_number (int): Redis database number.
 
-        postgres_host: Postgres host name.
-        postgres_port: Postgres port.
-        postgres_user: Postgres username.
-        postgres_password: <PASSWORD>.
+        postgres_host (str): Postgres host name.
+        postgres_port (int): Postgres port.
+        postgres_user (str): Postgres username.
+        postgres_password (str): Postgres password.
+        postgres_db_name (str): Name of the Postgres database.
     """
     redis_host: str
     redis_port: int

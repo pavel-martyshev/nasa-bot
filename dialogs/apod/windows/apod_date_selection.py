@@ -6,9 +6,18 @@ from aiogram_dialog.widgets.kbd import Back
 from aiogram_dialog.widgets.text import Format
 
 from dialogs.apod.getters.apod_date_selection import getter
-from dialogs.apod.handlers.apod_date_selection import handle_incorrect_message, handle_selected_date
+from dialogs.apod.handlers.apod_date_selection import handle_invalid_input, handle_selected_date
 from states.states import APODSG
 
+"""
+Dialog window for selecting a specific APOD date.
+
+Displays localized request prompt and validation messages.
+Handles both valid and invalid user input, and includes a back button.
+
+State:
+    APODSG.apod_date_selection
+"""
 apod_date_selection = Window(
     Format("{incorrect_format_message}" + "\n\n", when=F["incorrect_format"]),
     Format("{incorrect_date_message}" + "\n\n", when=F["incorrect_date"]),
@@ -19,7 +28,7 @@ apod_date_selection = Window(
     ),
     MessageInput(
         content_types=ContentType.ANY,
-        func=handle_incorrect_message,
+        func=handle_invalid_input,
     ),
     Back(
         text=Format("{back_button_text}")

@@ -4,16 +4,16 @@ from dataclasses import dataclass
 @dataclass
 class LogsSettings:
     """
-    Settings for the logging configuration.
+    Configuration settings for application logging.
 
     Attributes:
-        level: Logging level (e.g., DEBUG, INFO, WARNING).
-        dir_name: Directory name where log files will be stored.
-        file_name: Name of the log file.
-        handlers_format: Format string for log entries.
-        date_format: Format string for dates in logs.
-        time_rotating: Interval type for rotating logs (e.g., 'midnight', 'H' for hourly).
-        backup_count: Number of backup log files to keep.
+        level (str): Logging level (e.g., "DEBUG", "INFO").
+        dir_name (str): Directory where log files are stored.
+        file_name (str): Log file name.
+        handlers_format (str): Format string for log messages.
+        date_format (str): Format string for timestamps in logs.
+        time_rotating (str): Rotation interval (e.g., "midnight", "H" for hourly).
+        backup_count (int): Number of rotated log files to retain.
     """
     level: str
     dir_name: str

@@ -10,14 +10,17 @@ from aiogram_dialog.manager.message_manager import INPUT_MEDIA_TYPES, SEND_METHO
 from babel.dates import format_date
 
 from config.log_config import logger
-from database.postgres.core.CRUD.apod import APODCRUD
+from database.postgres.core.CRUD.apod import ApodCrud
 
 _DATE_PATTERN = r"\d{4}-\d{2}-\d{2}"
 
 
 class CustomMessageManager(MessageManager):
+    """
+    Extended message manager with language support and APOD file_id tracking.
+    """
     __language_code: str
-    __apod_crud: APODCRUD = APODCRUD()
+    __apod_crud: ApodCrud = ApodCrud()
 
     def __init__(self) -> None:
         super().__init__()
@@ -32,6 +35,13 @@ class CustomMessageManager(MessageManager):
         self.__language_code = value
 
     async def __save_file_id(self, message: Message, date: datetime) -> None:
+        """
+        Save file_id for the given date if it's not already stored.
+
+        Args:
+            message (Message): Telegram message containing media.
+            date (datetime): Date of the APOD media.
+        """
         media_content_type = message.content_type
 
         if media_content_type == ContentType.PHOTO:
@@ -47,6 +57,18 @@ class CustomMessageManager(MessageManager):
             logger.debug(f"Saved file_id for date {date.strftime('%Y-%m-%d')}")
 
     def __get_date_with_formatting_date_caption(self, text: str) -> tuple[datetime, str]:
+        """
+        Extract a date from the caption text and format it in a localized way.
+
+        Args:
+            text (str): Caption text containing a date in YYYY-MM-DD format.
+
+        Returns:
+            tuple[datetime, str]: Parsed date and caption with localized date formatting.
+
+        Raises:
+            ValueError: If date is missing or invalid.
+        """
         match = re.search(_DATE_PATTERN, text)
 
         if not match:
@@ -57,6 +79,16 @@ class CustomMessageManager(MessageManager):
         return date, re.sub(_DATE_PATTERN, format_date(date, format="long", locale=self.__language_code), text)
 
     async def send_media(self, bot: Bot, new_message: NewMessage) -> Message:
+        """
+        Send a media message and store its file_id if date is detected in caption.
+
+        Args:
+            bot (Bot): Aiogram bot instance.
+            new_message (NewMessage): Message data to be sent.
+
+        Returns:
+            Message: The message sent via Telegram.
+        """
         if not new_message.media:
             raise ValueError("There is no media in the message.")
 
@@ -96,6 +128,17 @@ class CustomMessageManager(MessageManager):
     async def edit_media(
             self, bot: Bot, new_message: NewMessage, old_message: OldMessage,
     ) -> Message:
+        """
+        Edit a media message and update its file_id if date is present in caption.
+
+        Args:
+            bot (Bot): Aiogram bot instance.
+            new_message (NewMessage): New message content.
+            old_message (OldMessage): Message to be edited.
+
+        Returns:
+            Message: The edited Telegram message.
+        """
         if not new_message.media:
             raise ValueError("There is no media in the message.")
 

@@ -6,18 +6,34 @@ from aiogram import BaseMiddleware
 from aiogram.types import TelegramObject, User
 from tortoise.contrib.pydantic import PydanticModel
 
-from database.postgres.core.CRUD.user import UserCRUD
+from database.postgres.core.CRUD.user import UserCrud
 
-user_crud = UserCRUD()
+user_crud = UserCrud()
 
 
 class UserActivityRegistrationMiddleware(BaseMiddleware):
+    """
+    Middleware that registers or updates user activity on each incoming event.
+
+    Creates the user if not present, and updates last_activity_time.
+    """
     async def __call__(
             self,
             handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
             event: TelegramObject,
             data: dict[str, Any]
     ) -> Any:
+        """
+        Track and update user activity before handling the event.
+
+        Args:
+            handler (Callable): Next handler in the middleware chain.
+            event (TelegramObject): Incoming Telegram event.
+            data (dict[str, Any]): Contextual data for the event.
+
+        Returns:
+            Any: Result from the next handler.
+        """
         event_from_user: User = data["event_from_user"]
 
         if event_from_user:

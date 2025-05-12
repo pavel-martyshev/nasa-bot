@@ -4,11 +4,24 @@ from aiogram_dialog.widgets.kbd import Button, Row, SwitchTo, WebApp
 from aiogram_dialog.widgets.media import DynamicMedia
 from aiogram_dialog.widgets.text import Format
 
+from config import app_settings
 from dialogs.apod.getters.apod_menu import ApodProvider
 from dialogs.apod.handlers.apod_menu import on_random_apod
 from dialogs.common.widgets import back_to_main_menu
 from states.states import APODSG
 
+"""
+Dialog window displaying the Astronomy Picture of the Day (APOD).
+
+Includes media preview, caption, and buttons for:
+- Selecting a specific date
+- Requesting a random picture
+- Opening a WebApp with explanation
+- Returning to the main menu
+
+State:
+    APODSG.apod_menu
+"""
 apod_menu = Window(
     DynamicMedia("resources", when=~F["media_not_exist_message"]),
     Format("{apod_caption}", when=~F["media_not_exist_message"]),
@@ -26,7 +39,7 @@ apod_menu = Window(
     Row(
         WebApp(
             text=Format("{explanation_button_text}"),
-            url=Format("https://nasa-bot-web-app.ru?apod_id={apod_id}&language_code={language_code}"),
+            url=Format(app_settings.web_app_url),
             when=~F["media_not_exist_message"]
         ),
         back_to_main_menu,

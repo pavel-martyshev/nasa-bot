@@ -1,6 +1,7 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 from dotenv import load_dotenv
 from yarl import URL
@@ -11,6 +12,7 @@ from config.logs_settings import LogsSettings
 
 SOURCE_PATH = Path(__file__).parent.parent
 
+# Load environment variables from .env or fallback to .env.example
 if os.path.exists(Path.joinpath(SOURCE_PATH, ".env")):
     load_dotenv(Path.joinpath(SOURCE_PATH, ".env"))
 else:
@@ -20,22 +22,28 @@ else:
 @dataclass
 class AppSettings:
     """
-    Top-level application settings container.
+    Main application settings container.
 
     Attributes:
-        token: Telegram bot token.
-        resources_path: Path to static resource files (e.g., images, videos).
-        tmp_resources_path: Path to temporary files used during processing.
-        quiet_download: If True, suppresses download-related logs or messages (e.g., from youtube-dl).
+        token (str): Telegram bot token.
+        resources_path (str): Path to static resources.
+        temp_resources_path (str): Path to temporary resources.
+        suppress_download_logs (bool): Suppress downloader logs if True.
+        web_app_url (str): Public URL of the deployed WebApp.
+        allowed_origins (list[str]): List of allowed request origins.
+        enable_translation (bool): Whether translation features are enabled.
 
-        logs: Logging configuration settings.
-        db: Database configuration settings.
-        api: API configuration settings.
+        logs (LogsSettings): Logging configuration.
+        db (DatabaseSettings): Database connection settings.
+        api (APISettings): External API configuration.
     """
     token: str
     resources_path: str
-    tmp_resources_path: str
-    quiet_download: bool
+    temp_resources_path: str
+    suppress_download_logs: bool
+    web_app_url: str
+    allowed_origins: list[str]
+    enable_translation: bool
 
     logs: LogsSettings
     db: DatabaseSettings
@@ -48,22 +56,40 @@ class AppSettings:
         if not self.resources_path:
             raise ValueError("Resources path is required")
 
-        if not self.tmp_resources_path:
+        if not self.temp_resources_path:
             raise ValueError("Temporary resources path is required")
 
     @staticmethod
     def get_date_format(language_code: str) -> str:
+        """
+        Return date format string based on language code.
+
+        Args:
+            language_code (str): Language code, e.g., "ru" or "en".
+
+        Returns:
+            str: Corresponding date format string.
+        """
         match language_code:
             case "ru":
                 return "%d.%m.%Y"
             case _:
                 return "%m/%d/%Y"
 
-    def get_full_tmp_path(self) -> Path:
-        if not (self.resources_path and self.tmp_resources_path):
+    def get_full_temp_path(self) -> Path:
+        """
+        Get the full path to the temporary resources directory.
+
+        Returns:
+            Path: Combined path of resources and temporary folder.
+
+        Raises:
+            KeyError: If either path is missing.
+        """
+        if not (self.resources_path and self.temp_resources_path):
             raise KeyError("Resources path or temporary resources path is missing.")
 
-        return Path(self.resources_path, self.tmp_resources_path)
+        return Path(self.resources_path, self.temp_resources_path)
 
 
 def load_settings() -> AppSettings:
@@ -76,8 +102,11 @@ def load_settings() -> AppSettings:
     return AppSettings(
         token=os.getenv("TOKEN", ""),
         resources_path=os.getenv("RESOURCES_PATH", ""),
-        tmp_resources_path=os.getenv("TMP_RESOURCES_PATH", ""),
-        quiet_download=bool(os.getenv("QUIET_DOWNLOAD")),
+        temp_resources_path=os.getenv("TEMP_RESOURCES_PATH", ""),
+        suppress_download_logs=bool(os.getenv("SUPPRESS_DOWNLOAD_LOGS")),
+        web_app_url=os.getenv("WEB_APP_URL", ""),
+        allowed_origins=cast(str, os.getenv("ALLOWED_ORIGINS")).split(os.getenv("ORIGINS_SEPARATOR", ";")),
+        enable_translation=bool(os.getenv("ENABLE_TRANSLATION")),
 
         logs=LogsSettings(
             level=os.getenv("LEVEL", "INFO"),

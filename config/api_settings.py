@@ -7,13 +7,16 @@ from yarl import URL
 @dataclass
 class APISettings:
     """
-    Settings for all API configurations.
+    Holds configuration for external APIs and bot server settings.
 
     Attributes:
-        nasa_api_base_url: Base URL of the NASA API.
-        nasa_api_key: API key for authentication.
-        translate_api_key: API key for translation.
-        folder_id: Yandex cloud folder ID.
+        nasa_api_base_url (URL): Base URL for NASA API.
+        nasa_api_key (str): NASA API key.
+        translate_api_url (URL): Base URL for the translation API.
+        translate_api_key (str): Translation API key.
+        folder_id (str): Yandex Cloud folder ID.
+        bot_api_host (str): Hostname for the bot API server.
+        bot_api_port (int): Port for the bot API server.
     """
     nasa_api_base_url: URL
     nasa_api_key: str
@@ -43,16 +46,16 @@ class APISettings:
         if not self.folder_id:
             raise KeyError(error_message.format(argument_name="folder_id"))
 
-    def build_url(self, *args: str, **kwargs: Any) -> URL:
+    def build_nasa_url(self, *args: str, **kwargs: Any) -> URL:
         """
-        Build a full API URL by joining base URL with additional path parts and optional query parameters.
+        Construct a full NASA API URL from path segments and optional query parameters.
 
         Args:
-            *args: Parts of the URL path to append.
-            **kwargs: Query parameters to add to the URL.
+            *args: URL path segments to append.
+            **kwargs: (optional) Query parameters.
 
         Returns:
-            Full URL ready to use for an API request.
+            URL: Fully constructed API URL.
         """
         full_url = self.nasa_api_base_url
 

@@ -11,6 +11,17 @@ from states.states import APODSG
 
 
 async def handle_selected_date(message: Message, _widget: MessageInput, dialog_manager: DialogManager) -> None:
+    """
+    Validate user-input date and update dialog state for APOD retrieval.
+
+    Args:
+        message (Message): Incoming Telegram message with user input.
+        _widget (unused): Dialog widget reference.
+        dialog_manager (DialogManager): Dialog manager for state and context.
+
+    Raises:
+        ValueError: If the message has no text.
+    """
     language_code: str = cast(str, dialog_manager.middleware_data.get("language_code"))
 
     if not message.text:
@@ -32,5 +43,13 @@ async def handle_selected_date(message: Message, _widget: MessageInput, dialog_m
     await dialog_manager.switch_to(APODSG.apod_menu)
 
 
-async def handle_incorrect_message(_message: Message, _widget: MessageInput, dialog_manager: DialogManager) -> None:
+async def handle_invalid_input(_message: Message, _widget: MessageInput, dialog_manager: DialogManager) -> None:
+    """
+    Fallback handler that marks the user input as having incorrect format.
+
+    Args:
+        _message (unused): Incoming Telegram message.
+        _widget (unused): Dialog widget reference.
+        dialog_manager (DialogManager): Dialog manager to update dialog state.
+    """
     dialog_manager.dialog_data.update(incorrect_format=True)

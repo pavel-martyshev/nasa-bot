@@ -13,17 +13,18 @@ from icecream import install
 
 from config import app_settings
 
-# Install IceCream for debugging
+# Install Icecream for easier debugging output
 install()
 
-# Configure the logger
+# Initialize root logger
 logger = logging.getLogger()
 
-# Set log level from config
-LOGS_LEVEL = getattr(logging, app_settings.logs.level)
-logger.setLevel(LOGS_LEVEL)
+# Set logging level based on config
+logs_level = getattr(logging, app_settings.logs.level)
+logger.setLevel(logs_level)
 
-logs_dir = os.path.join(Path(__file__).parent.parent, app_settings.logs.dir_name if LOGS_LEVEL > 10 else "tmp")
+# Use "tmp" directory for logs if level is DEBUG or lower (<=10)
+logs_dir = os.path.join(Path(__file__).parent.parent, app_settings.logs.dir_name if logs_level > 10 else "tmp")
 
 # Create logs directory if it doesn't exist
 os.makedirs(logs_dir, exist_ok=True)
@@ -51,13 +52,14 @@ logger.addHandler(logs_stream_handler)
 
 def exception_handler(exc_type: Any, exc_value: Any, exc_traceback: Any) -> None:
     """
-    Logs uncaught exceptions with full traceback information.
-    This handler ignores KeyboardInterrupt to allow clean shutdowns.
+    Custom exception handler that logs uncaught exceptions with traceback.
+
+    Skips KeyboardInterrupt to allow graceful shutdown.
 
     Args:
-        exc_type: The type of the exception.
-        exc_value: The exception instance.
-        exc_traceback: The traceback object.
+        exc_type (Any): Exception class/type.
+        exc_value (Any): Exception instance.
+        exc_traceback (Any): Traceback object.
     """
     if exc_type.__name__ == "KeyboardInterrupt":
         return
@@ -75,16 +77,13 @@ sys.excepthook = exception_handler
 
 def log_return_value(method: Any) -> Any:
     """
-    Decorator to log the return value of a function.
-
-    Supports both synchronous and asynchronous functions.
-    Logs the function name and its returned result after execution.
+    Decorator that logs the return value of a function (sync or async).
 
     Args:
-        method (Callable): The function to be decorated.
+        method (Callable): Target function to wrap.
 
     Returns:
-        Callable: The wrapped function that logs its return value.
+        Callable: Wrapped function with logging.
     """
     log_message = "Function {method_name} returned: {result}"
 

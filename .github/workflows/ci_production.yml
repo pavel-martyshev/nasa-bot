@@ -1,13 +1,18 @@
-name: CI
+name: CI production
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    tags:
+      - "v*"
   pull_request:
 
 jobs:
   lint-test:
+    name: Run linters and tests
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
 
