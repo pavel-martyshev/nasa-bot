@@ -22,7 +22,7 @@ jobs:
 
       - name: Deploy to Server via SSH
         run: |
-          rsync -a . ${{ secrets.APP_DEPLOY_PATH }}
+          rsync -a --delete --exclude='.git' --exclude='.github' --exclude='.env.example' . ${{ secrets.APP_DEPLOY_PATH }}
           cd ${{ secrets.APP_DEPLOY_PATH }}
           source venv/bin/activate
           pip install -r requirements.txt
