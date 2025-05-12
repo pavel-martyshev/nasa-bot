@@ -2,8 +2,6 @@ name: CI production
 
 on:
   push:
-    branches:
-      - main
     tags:
       - "v*"
 
