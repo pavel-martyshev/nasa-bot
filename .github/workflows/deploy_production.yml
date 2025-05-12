@@ -22,12 +22,14 @@ jobs:
       - name: Deploy to Server via SSH
         run: |
           rsync -a --delete \
-            --exclude='venv' \
             --exclude='.git' \
             --exclude='.github' \
             --exclude='.env' \
             --exclude='.env.example' \
+            --exclude='venv/' \
             --exclude='logs/' \
+            --exclude='*.log' \
+            --exclude='**/migrations/' \
             --exclude='**/__pycache__/' . ${{ secrets.APP_DEPLOY_PATH }}
           cd ${{ secrets.APP_DEPLOY_PATH }}
           source venv/bin/activate
