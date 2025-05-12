@@ -87,7 +87,7 @@ You may also configure a web server like Nginx to proxy requests to this API if 
 - utils/ — helper modules (translation, HTTP client, enums, etc.)
 
 ---
-## 📜 Лицензия
+## 📜 License
 
 This project is licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed).
 
