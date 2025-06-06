@@ -17,6 +17,7 @@ class DatabaseSettings:
         postgres_password (str): Postgres password.
         postgres_db_name (str): Name of the Postgres database.
     """
+
     redis_host: str
     redis_port: int
     redis_db_number: int

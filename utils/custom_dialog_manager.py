@@ -16,22 +16,20 @@ class CustomDialogManager(DefaultManagerFactory):
 
     Extends DefaultManagerFactory to customize dialog behavior per language.
     """
+
     def __init__(
-            self,
-            message_manager: CustomMessageManager,
-            media_id_storage: MediaIdStorageProtocol,
+        self,
+        message_manager: CustomMessageManager,
+        media_id_storage: MediaIdStorageProtocol,
     ):
-        super().__init__(
-            message_manager,
-            media_id_storage
-        )
+        super().__init__(message_manager, media_id_storage)
 
     def __call__(
-            self,
-            event: ChatEvent,
-            data: dict[str, Any],
-            registry: DialogRegistryProtocol,
-            router: Router,
+        self,
+        event: ChatEvent,
+        data: dict[str, Any],
+        registry: DialogRegistryProtocol,
+        router: Router,
     ) -> DialogManager:
         """
         Create a DialogManager instance with injected language-aware message manager.

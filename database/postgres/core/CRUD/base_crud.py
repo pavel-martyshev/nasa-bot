@@ -16,6 +16,7 @@ class BaseCrud(ABC):
         - _model: ORM model class.
         - _schema: Corresponding Pydantic schema (as a Schema enum).
     """
+
     @property
     @abstractmethod
     def _model(self) -> type[Model]:
@@ -75,12 +76,7 @@ class BaseCrud(ABC):
         return await self._get_model_schema(self._schema, (await self._model.get_or_create(**kwargs))[0])
 
     @atomic()
-    async def update(
-            self,
-            *,
-            filters: dict[str, Any],
-            **kwargs: Any
-    ) -> PydanticModel | bool:
+    async def update(self, *, filters: dict[str, Any], **kwargs: Any) -> PydanticModel | bool:
         """
         Update an existing model instance with new values.
 

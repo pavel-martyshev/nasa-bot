@@ -11,6 +11,7 @@ class BaseProtocol(Protocol):
         created_at (int): Unix timestamp of creation.
         is_deleted (bool): Soft delete flag.
     """
+
     id: int
     created_at: int
     is_deleted: bool
@@ -31,6 +32,7 @@ class ApodProtocol(BaseProtocol):
         media_type (str): Type of media (e.g., "image", "video").
         file_id (str): Telegram file identifier.
     """
+
     title: str
     title_ru: str
     date: datetime

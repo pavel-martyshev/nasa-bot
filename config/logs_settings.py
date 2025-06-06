@@ -15,6 +15,7 @@ class LogsSettings:
         time_rotating (str): Rotation interval (e.g., "midnight", "H" for hourly).
         backup_count (int): Number of rotated log files to retain.
     """
+
     level: str
     dir_name: str
     file_name: str

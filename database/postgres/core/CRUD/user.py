@@ -11,6 +11,7 @@ class UserCrud(BaseCrud):
     """
     CRUD operations for the User model.
     """
+
     @property
     def _model(self) -> type[UserModel]:
         return UserModel

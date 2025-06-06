@@ -12,13 +12,11 @@ class AiogramFactory:
 
     @staticmethod
     def get_user_instance(
-            *,
-            user_id: Optional[int] = None,
-            first_name: str = "User",
-            language_code: str = "en") -> User:
+        *, user_id: Optional[int] = None, first_name: str = "User", language_code: str = "en"
+    ) -> User:
         return User(
             id=user_id if user_id else randint(1000000, 9999999),
             is_bot=False,
             first_name=first_name,
-            language_code=language_code
+            language_code=language_code,
         )

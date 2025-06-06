@@ -31,20 +31,16 @@ apod_menu = Window(
         state=APODSG.apod_date_selection,
         id="apod_date_selection",
     ),
-    Button(
-        Format("{random_picture_button_text}"),
-        on_click=on_random_apod,
-        id="random_apod"
-    ),
+    Button(Format("{random_picture_button_text}"), on_click=on_random_apod, id="random_apod"),
     Row(
         WebApp(
             text=Format("{explanation_button_text}"),
             url=Format(app_settings.web_app_url),
-            when=~F["media_not_exist_message"]
+            when=~F["media_not_exist_message"],
         ),
         back_to_main_menu,
     ),
     parse_mode="MARKDOWN",
     getter=ApodProvider(),
-    state=APODSG.apod_menu
+    state=APODSG.apod_menu,
 )

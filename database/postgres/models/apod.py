@@ -22,12 +22,13 @@ class ApodModel(OrmBaseModel):
         table (str): Name of the database table.
         ordering (list[str]): Default ordering by ID.
     """
+
     title = CharField(max_length=100, null=False)
     title_ru = CharField(max_length=100, null=True)
 
     date = DateField(null=False)
 
-    explanation	= TextField(null=False)
+    explanation = TextField(null=False)
     explanation_ru = TextField(null=True)
 
     url = CharField(max_length=150, null=False)

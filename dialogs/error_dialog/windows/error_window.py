@@ -14,9 +14,4 @@ Used as a safety net to ensure the bot remains responsive.
 State:
     ErrorDialog.error
 """
-error_window = Window(
-    Format("{unexpected_error_message}"),
-    back_to_main_menu,
-    getter=getter,
-    state=ErrorDialog.error
-)
+error_window = Window(Format("{unexpected_error_message}"), back_to_main_menu, getter=getter, state=ErrorDialog.error)
