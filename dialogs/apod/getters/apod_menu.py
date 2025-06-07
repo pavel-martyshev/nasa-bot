@@ -141,8 +141,15 @@ class ApodProvider:
         bot: Bot | None = dialog_manager.event.bot
 
         if bot:
-            event: Message | CallbackQuery = dialog_manager.event
-            chat_id: int = event.chat.id if isinstance(event, Message) else event.message.chat.id
+            event: Message | CallbackQuery = cast(Message | CallbackQuery, dialog_manager.event)
+
+            if isinstance(event, Message):
+                chat_id: int = event.chat.id
+            elif isinstance(event, CallbackQuery):
+                message = cast(Message, event.message)
+                chat_id = message.chat.id
+            else:
+                raise ValueError(f"Event is not a Message or CallbackQuery ({type(event)}).")
 
             if media_type == "image":
                 await bot.send_chat_action(chat_id, ChatAction.UPLOAD_PHOTO)
