@@ -12,7 +12,7 @@ class BotMock(Bot):
     if TYPE_CHECKING:
         session: SessionMock
 
-    def __init__(self, **kwargs :Any) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(
             kwargs.pop("token", "42:TEST"),
             session=SessionMock(),
@@ -28,14 +28,14 @@ class BotMock(Bot):
         )
 
     def add_result_for(
-            self,
-            method: type[TelegramMethod[TelegramType]],
-            ok: bool,
-            result: TelegramType | None = None,
-            description: Optional[str] = None,
-            error_code: int = 200,
-            migrate_to_chat_id: Optional[int] = None,
-            retry_after: Optional[int] = None,
+        self,
+        method: type[TelegramMethod[TelegramType]],
+        ok: bool,
+        result: TelegramType | None = None,
+        description: Optional[str] = None,
+        error_code: int = 200,
+        migrate_to_chat_id: Optional[int] = None,
+        retry_after: Optional[int] = None,
     ) -> Response[TelegramType]:
         response = Response[method.__returning__](  # type: ignore
             ok=ok,
