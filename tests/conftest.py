@@ -2,6 +2,7 @@ import sys
 from collections.abc import AsyncGenerator
 from pathlib import Path
 from typing import Any
+from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
@@ -29,10 +30,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 async def init_db() -> AsyncGenerator[Any, None]:
     await Tortoise.init(
         db_url="sqlite://:memory:",
-        modules={"models": [
-            "database.postgres.models.apod",
-            "database.postgres.models.user",
-        ]}
+        modules={
+            "models": [
+                "database.postgres.models.apod",
+                "database.postgres.models.user",
+            ]
+        },
     )
     await Tortoise.generate_schemas()
 
@@ -48,21 +51,14 @@ def translator_hub() -> TranslatorHub:
     en_locales_path = source_path.joinpath(*("locales", "en", "LC_MESSAGES", "txt.ftl"))
 
     translator_hub = TranslatorHub(
-        {
-            "ru": ("ru", "en"),
-            "en": ("en", "ru")
-        },
+        {"ru": ("ru", "en"), "en": ("en", "ru")},
         [
             FluentTranslator(
-                locale="ru",
-                translator=FluentBundle.from_files(
-                    locale="ru-RU",
-                    filenames=[ru_locales_path])),
+                locale="ru", translator=FluentBundle.from_files(locale="ru-RU", filenames=[ru_locales_path])
+            ),
             FluentTranslator(
-                locale="en",
-                translator=FluentBundle.from_files(
-                    locale="en-US",
-                    filenames=[en_locales_path]))
+                locale="en", translator=FluentBundle.from_files(locale="en-US", filenames=[en_locales_path])
+            ),
         ],
     )
 
@@ -78,9 +74,7 @@ def dispatcher() -> Dispatcher:
 
     dp.message.register(root_handler, CommandStart())
     dp.include_routers(
-        DialogsFactory.get_apod_dialog(),
-        DialogsFactory.get_main_menu_dialog(),
-        DialogsFactory.get_error_dialog()
+        DialogsFactory.get_apod_dialog(), DialogsFactory.get_main_menu_dialog(), DialogsFactory.get_error_dialog()
     )
 
     setup_dialogs(
@@ -88,15 +82,20 @@ def dispatcher() -> Dispatcher:
         message_manager=CustomMessageManager(),
         dialog_manager_factory=CustomDialogManager(
             CustomMessageManager(),
-            MediaIdStorage()  # type: ignore[no-untyped-call]
-        )
+            MediaIdStorage(),  # type: ignore[no-untyped-call]
+        ),
     )
 
     return dp
 
 
 @pytest.fixture(scope="function", autouse=True)
-def bot() -> BotMock:
+def bot_mock() -> BotMock:
     bot = BotMock()
     bot.session = SessionMock()
     return bot
+
+
+@pytest.fixture(autouse=True)
+def disable_send_chat_action(monkeypatch):
+    monkeypatch.setattr("dialogs.apod.getters.apod_menu.ApodProvider._ApodProvider__send_chat_action", AsyncMock())
