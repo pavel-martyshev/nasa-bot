@@ -97,6 +97,8 @@ def load_settings() -> AppSettings:
     Returns:
         AppSettings: Configured application settings.
     """
+    webhook_port: str = os.getenv("WEBHOOK_PORT") or "8000"
+
     return AppSettings(
         token=os.getenv("TOKEN", ""),
         resources_path=os.getenv("RESOURCES_PATH", ""),
@@ -131,7 +133,7 @@ def load_settings() -> AppSettings:
             folder_id=os.getenv("FOLDER_ID", ""),
             base_webhook_url=URL(os.getenv("BASE_WEBHOOK_URL", "")),
             webhook_host=os.getenv("WEBHOOK_HOST"),
-            webhook_port=int(os.getenv("WEBHOOK_PORT", 8000)),
+            webhook_port=int(webhook_port),
             webhook_path=os.getenv("WEBHOOK_PATH"),
             webhook_key=os.getenv("WEBHOOK_KEY"),
         ),
