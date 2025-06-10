@@ -30,7 +30,7 @@ async def handle_selected_date(message: Message, _widget: MessageInput, dialog_m
     try:
         date = datetime.strptime(
             message.text.replace(",", ".").lstrip("\u2068").rstrip("\u2069"),
-            app_settings.get_date_format(language_code)
+            app_settings.get_date_format(language_code),
         )
     except ValueError:
         logger.exception("Date formatting error")

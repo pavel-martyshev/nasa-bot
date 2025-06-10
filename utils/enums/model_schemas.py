@@ -10,5 +10,6 @@ class ModelSchemas(Enum):
     """
     Enum container for Pydantic schema instances generated from ORM models.
     """
+
     APODSchema = pydantic_model_creator(ApodModel)
     UserSchema = pydantic_model_creator(UserModel)

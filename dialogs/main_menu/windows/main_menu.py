@@ -16,12 +16,7 @@ State:
 """
 main_menu = Window(
     Format("{main_menu_text}"),
-    Start(
-        Format("{apod_button_text}"),
-        state=APODSG.apod_menu,
-        mode=StartMode.RESET_STACK,
-        id="apod"
-    ),
+    Start(Format("{apod_button_text}"), state=APODSG.apod_menu, mode=StartMode.RESET_STACK, id="apod"),
     getter=getter,
-    state=MainMenuSG.main_menu
+    state=MainMenuSG.main_menu,
 )

@@ -19,6 +19,7 @@ class UserModel(OrmBaseModel):
         table (str): Name of the database table.
         ordering (list[str]): Default ordering by ID.
     """
+
     telegram_id = IntField(null=False)
     username = CharField(max_length=100, null=True)
 

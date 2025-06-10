@@ -10,6 +10,7 @@ class HttpClient:
     """
     Utility class for making HTTP requests and translating text via external API.
     """
+
     @staticmethod
     @request_executor()
     async def get(response: ClientResponse, *_: Any, **__: Any) -> Any:
@@ -55,16 +56,16 @@ class HttpClient:
         """
         return {
             "url": app_settings.api.translate_api_url,
-            "headers":{
+            "headers": {
                 "Content-Type": "application/json",
-                "Authorization": f"Api-Key {app_settings.api.translate_api_key}"
+                "Authorization": f"Api-Key {app_settings.api.translate_api_key}",
             },
-            "json":{
+            "json": {
                 "folderId": app_settings.api.folder_id,
                 "texts": texts if isinstance(texts, list) else [texts],
                 "targetLanguageCode": "ru",
-                "sourceLanguageCode": "en"
-            }
+                "sourceLanguageCode": "en",
+            },
         }
 
     @classmethod

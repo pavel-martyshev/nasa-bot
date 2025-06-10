@@ -30,10 +30,8 @@ apod_date_selection = Window(
         content_types=ContentType.ANY,
         func=handle_invalid_input,
     ),
-    Back(
-        text=Format("{back_button_text}")
-    ),
+    Back(text=Format("{back_button_text}")),
     parse_mode=ParseMode.MARKDOWN,
     getter=getter,
-    state=APODSG.apod_date_selection
+    state=APODSG.apod_date_selection,
 )

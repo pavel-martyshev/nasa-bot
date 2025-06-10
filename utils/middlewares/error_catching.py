@@ -16,11 +16,12 @@ class SafeDialogMiddleware(BaseMiddleware):
     Logs the exception and redirects the user to a fallback error dialog,
     preventing the bot from appearing unresponsive.
     """
+
     async def __call__(
         self,
         handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
         event: TelegramObject,
-        data: dict[str, Any]
+        data: dict[str, Any],
     ) -> Any:
         """
         Wraps the handler execution in a try-except block.

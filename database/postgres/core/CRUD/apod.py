@@ -11,6 +11,7 @@ class ApodCrud(BaseCrud):
     """
     CRUD operations for the APOD model.
     """
+
     @property
     def _model(self) -> type[ApodModel]:
         return ApodModel

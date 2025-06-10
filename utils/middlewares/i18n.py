@@ -12,10 +12,10 @@ class TranslatorRunnerMiddleware(BaseMiddleware):
     """
 
     async def __call__(
-            self,
-            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
-            event: TelegramObject,
-            data: dict[str, Any]
+        self,
+        handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: dict[str, Any],
     ) -> Any:
         """
         Add translator and language code to context data for localization support.

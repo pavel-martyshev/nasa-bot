@@ -22,8 +22,7 @@ async def getter(dialog_manager: DialogManager, i18n: TranslatorRunner, language
     """
     result = {
         "date_request": i18n.get(
-            "date_request",
-            max_date=datetime.today().strftime(app_settings.get_date_format(language_code))
+            "date_request", max_date=datetime.today().strftime(app_settings.get_date_format(language_code))
         ),
         "back_button_text": i18n.get("back"),
     }

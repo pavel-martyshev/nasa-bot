@@ -19,6 +19,7 @@ class CustomMessageManager(MessageManager):
     """
     Extended message manager with language support and APOD file_id tracking.
     """
+
     __language_code: str
     __apod_crud: ApodCrud = ApodCrud()
 
@@ -52,7 +53,7 @@ class CustomMessageManager(MessageManager):
         else:
             file_id = getattr(message, media_content_type).file_id
 
-        if not await  self.__apod_crud.exists(file_id=file_id):
+        if not await self.__apod_crud.exists(file_id=file_id):
             await self.__apod_crud.update(filters={"date": date}, file_id=file_id)
             logger.debug(f"Saved file_id for date {date.strftime('%Y-%m-%d')}")
 
@@ -126,7 +127,10 @@ class CustomMessageManager(MessageManager):
         return media_message
 
     async def edit_media(
-            self, bot: Bot, new_message: NewMessage, old_message: OldMessage,
+        self,
+        bot: Bot,
+        new_message: NewMessage,
+        old_message: OldMessage,
     ) -> Message:
         """
         Edit a media message and update its file_id if date is present in caption.

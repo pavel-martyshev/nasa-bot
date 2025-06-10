@@ -3,8 +3,8 @@ from config import app_settings
 TORTOISE_ORM = {
     "connections": {
         "default": f"postgres://{app_settings.db.postgres_user}:{app_settings.db.postgres_password}"
-                   f"@{app_settings.db.postgres_host}:{app_settings.db.postgres_port}"
-                   f"/{app_settings.db.postgres_db_name}"
+        f"@{app_settings.db.postgres_host}:{app_settings.db.postgres_port}"
+        f"/{app_settings.db.postgres_db_name}"
     },
     "apps": {
         "models": {
@@ -15,5 +15,5 @@ TORTOISE_ORM = {
             ],
             "default_connection": "default",
         }
-    }
+    },
 }

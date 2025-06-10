@@ -17,11 +17,12 @@ class UserActivityRegistrationMiddleware(BaseMiddleware):
 
     Creates the user if not present, and updates last_activity_time.
     """
+
     async def __call__(
-            self,
-            handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
-            event: TelegramObject,
-            data: dict[str, Any]
+        self,
+        handler: Callable[[TelegramObject, dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
+        data: dict[str, Any],
     ) -> Any:
         """
         Track and update user activity before handling the event.

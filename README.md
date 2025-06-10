@@ -65,11 +65,8 @@ To display a long text explanation, Telegram uses WebApp, a mini web application
 To make it work:
 1. You need to host a web page with HTTPS (e.g. via Vercel, Netlify or your own server with an SSL certificate).
 2. The page should accept parameters (title and image description) and display them.
-3. To communicate with the bot, an API is used, launched by the command:
-```bash
-cd api
-python app.py
-```
+3. The bot must be launched using webhooks.
+
 You may also configure a web server like Nginx to proxy requests to this API if needed.
 
 ---

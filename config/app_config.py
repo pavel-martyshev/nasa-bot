@@ -1,7 +1,6 @@
 import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import cast
 
 from dotenv import load_dotenv
 from yarl import URL
@@ -30,19 +29,18 @@ class AppSettings:
         temp_resources_path (str): Path to temporary resources.
         suppress_download_logs (bool): Suppress downloader logs if True.
         web_app_url (str): Public URL of the deployed WebApp.
-        allowed_origins (list[str]): List of allowed request origins.
         enable_translation (bool): Whether translation features are enabled.
 
         logs (LogsSettings): Logging configuration.
         db (DatabaseSettings): Database connection settings.
         api (APISettings): External API configuration.
     """
+
     token: str
     resources_path: str
     temp_resources_path: str
     suppress_download_logs: bool
     web_app_url: str
-    allowed_origins: list[str]
     enable_translation: bool
 
     logs: LogsSettings
@@ -99,15 +97,15 @@ def load_settings() -> AppSettings:
     Returns:
         AppSettings: Configured application settings.
     """
+    webhook_port: str = os.getenv("WEBHOOK_PORT") or "8000"
+
     return AppSettings(
         token=os.getenv("TOKEN", ""),
         resources_path=os.getenv("RESOURCES_PATH", ""),
         temp_resources_path=os.getenv("TEMP_RESOURCES_PATH", ""),
         suppress_download_logs=bool(os.getenv("SUPPRESS_DOWNLOAD_LOGS")),
         web_app_url=os.getenv("WEB_APP_URL", ""),
-        allowed_origins=cast(str, os.getenv("ALLOWED_ORIGINS")).split(os.getenv("ORIGINS_SEPARATOR", ";")),
         enable_translation=bool(os.getenv("ENABLE_TRANSLATION")),
-
         logs=LogsSettings(
             level=os.getenv("LEVEL", "INFO"),
             dir_name=os.getenv("DIR_NAME", "logs"),
@@ -117,7 +115,6 @@ def load_settings() -> AppSettings:
             time_rotating=os.getenv("TIME_ROTATING", "D"),
             backup_count=int(os.getenv("BACKUP_COUNT", 10)),
         ),
-
         db=DatabaseSettings(
             redis_host=os.getenv("REDIS_HOST", "localhost"),
             redis_port=int(os.getenv("REDIS_PORT", 6379)),
@@ -128,16 +125,18 @@ def load_settings() -> AppSettings:
             postgres_password=os.getenv("POSTGRES_PASSWORD", "<PASSWORD>"),
             postgres_db_name=os.getenv("POSTGRES_DB_NAME", "postgres"),
         ),
-
         api=APISettings(
             nasa_api_base_url=URL(os.getenv("NASA_API_BASE_URL", "")),
             nasa_api_key=os.getenv("NASA_API_KEY", ""),
             translate_api_url=URL(os.getenv("TRANSLATE_API_URL", "")),
             translate_api_key=os.getenv("TRANSLATE_API_KEY", ""),
             folder_id=os.getenv("FOLDER_ID", ""),
-            bot_api_host=os.getenv("BOT_API_HOST", "localhost"),
-            bot_api_port=int(os.getenv("BOT_API_PORT", 8000)),
-        )
+            base_webhook_url=URL(os.getenv("BASE_WEBHOOK_URL", "")),
+            webhook_host=os.getenv("WEBHOOK_HOST"),
+            webhook_port=int(webhook_port),
+            webhook_path=os.getenv("WEBHOOK_PATH"),
+            webhook_key=os.getenv("WEBHOOK_KEY"),
+        ),
     )
 
 

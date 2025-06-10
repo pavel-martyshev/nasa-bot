@@ -27,10 +27,7 @@ class SessionMock(BaseSession):
         self.closed = True
 
     async def make_request(
-        self,
-        bot: Bot,
-        method: TelegramMethod[TelegramType],
-        timeout: Optional[int] = UNSET_PARSE_MODE
+        self, bot: Bot, method: TelegramMethod[TelegramType], timeout: Optional[int] = UNSET_PARSE_MODE
     ) -> TelegramType:
         self.closed = False
         self.requests.append(method)

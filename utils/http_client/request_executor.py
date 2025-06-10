@@ -10,11 +10,9 @@ from config.log_config import logger
 R = TypeVar("R")
 
 
-def request_executor(method: str = "GET") -> Callable[
-    [Callable[[ClientResponse, dict[str, Any]],
-    Awaitable[R]]],
-    Callable[..., Awaitable[R]]
-]:
+def request_executor(
+    method: str = "GET",
+) -> Callable[[Callable[[ClientResponse, dict[str, Any]], Awaitable[R]]], Callable[..., Awaitable[R]]]:
     """
     Wrap an HTTP request function with aiohttp session and error handling.
 
@@ -24,6 +22,7 @@ def request_executor(method: str = "GET") -> Callable[
     Returns:
         Callable: Decorator that injects a ClientResponse into the wrapped function.
     """
+
     def decorator(func: Callable[[ClientResponse, Any], Awaitable[R]]) -> Callable[..., Awaitable[R]]:
         @wraps(func)
         async def wrapper(*args: Any, **kwargs: Any) -> Any:

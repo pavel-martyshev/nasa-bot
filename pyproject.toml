@@ -4,10 +4,14 @@ location = "./database/postgres/migrations"
 src_folder = "./."
 
 [tool.ruff]
-select = ["F", "E", "W", "I", "UP"]
+select = ["I", "F", "E", "W", "UP", "C4", "B"]
 ignore = []
 line-length = 120
-exclude = ["migrations", ".venv"]
+exclude = ["migrations", "venv"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
