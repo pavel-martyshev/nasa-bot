@@ -1,6 +1,6 @@
 import asyncio
 
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, F
 from aiogram.filters import CommandStart
 from aiogram.methods import DeleteWebhook
 from aiogram.types import Message
@@ -15,8 +15,8 @@ from config import app_settings
 from config.log_config import logger
 from database.postgres.core import init_db
 from database.redis import storage
-from dialogs import apod_dialog, error_dialog, main_menu_dialog
-from states.states import MainMenuSG
+from dialogs import apod_dialog, error_dialog, info_dialog, main_menu_dialog
+from states.states import InfoSG, MainMenuSG
 from utils.create_translator_hub import create_translator_hub
 from utils.custom_dialog_manager import CustomDialogManager
 from utils.custom_message_manager import CustomMessageManager
@@ -38,6 +38,18 @@ async def root_handler(_message: Message, dialog_manager: DialogManager) -> None
         dialog_manager (DialogManager): Dialog manager instance.
     """
     await dialog_manager.start(MainMenuSG.main_menu, mode=StartMode.RESET_STACK)
+
+
+@dp.message(F.text == "/info")
+async def info_handler(_message: Message, dialog_manager: DialogManager) -> None:
+    """
+    Handle /info command by launching the info dialog.
+
+    Args:
+        _message (Message): Incoming Telegram message (unused).
+        dialog_manager (DialogManager): Dialog manager instance.
+    """
+    await dialog_manager.start(InfoSG.info, mode=StartMode.RESET_STACK)
 
 
 async def on_startup() -> None:
@@ -116,7 +128,7 @@ def setup_dispatcher() -> None:
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)
 
-    dp.include_routers(error_dialog, main_menu_dialog, apod_dialog)
+    dp.include_routers(error_dialog, main_menu_dialog, apod_dialog, info_dialog)
 
     setup_dialogs(
         dp,
