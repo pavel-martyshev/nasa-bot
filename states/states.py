@@ -5,6 +5,10 @@ class ErrorDialog(StatesGroup):
     error = State()
 
 
+class InfoSG(StatesGroup):
+    info = State()
+
+
 class MainMenuSG(StatesGroup):
     main_menu = State()
 
