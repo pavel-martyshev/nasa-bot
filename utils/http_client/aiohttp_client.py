@@ -15,7 +15,7 @@ class HttpClient:
     @request_executor()
     async def get(response: ClientResponse, *_: Any, **__: Any) -> ClientResponse:
         """
-        Perform a GET request and parse the response as JSON.
+        Perform a GET request.
 
         Args:
             response (ClientResponse): Response object from aiohttp session.
@@ -26,6 +26,22 @@ class HttpClient:
             ClientResponse: response object.
         """
         return response
+
+    @staticmethod
+    @request_executor()
+    async def get_json(response: ClientResponse, *_: Any, **__: Any) -> Any:
+        """
+        Perform a GET request and parse the response as JSON.
+
+        Args:
+            response (ClientResponse): Response object from aiohttp session.
+            *_ (unused): Ignored positional arguments.
+            **__ (unused): Ignored keyword arguments.
+
+        Returns:
+            Any: Parsed JSON response.
+        """
+        return await response.json()
 
     @staticmethod
     @request_executor(method="POST")

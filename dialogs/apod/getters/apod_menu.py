@@ -6,7 +6,6 @@ from aiogram.enums import ContentType
 from aiogram.types import User
 from aiogram_dialog import DialogManager
 from aiogram_dialog.api.entities import MediaAttachment, MediaId
-from aiohttp import ClientResponse
 from fluentogram import TranslatorRunner
 from yarl import URL
 from yt_dlp import DownloadError
@@ -126,8 +125,7 @@ class ApodProvider:
         Returns:
             dict[str, Any]: Final prepared data with optional translation.
         """
-        response: ClientResponse = await HttpClient.get(url=self.__get_apod_url(apod_date, is_random))
-        apod_json: dict[str, Any] = await response.json()
+        apod_json: dict[str, Any] = await HttpClient.get_json(url=self.__get_apod_url(apod_date, is_random))
 
         if isinstance(apod_json, list):
             apod_json = apod_json[0]
