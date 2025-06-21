@@ -1,20 +1,23 @@
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Union, cast
+from typing import Any, cast
 
 from aiogram import Bot
-from aiogram.enums import ChatAction, ContentType
-from aiogram.types import CallbackQuery, Message
+from aiogram.enums import ContentType
+from aiogram.types import User
 from aiogram_dialog import DialogManager
 from aiogram_dialog.api.entities import MediaAttachment, MediaId
+from aiohttp import ClientResponse
 from fluentogram import TranslatorRunner
 from yarl import URL
-from yt_dlp import DownloadError, YoutubeDL
+from yt_dlp import DownloadError
 
 from config import app_settings
 from config.log_config import log_return_value, logger
 from database.postgres.core.CRUD.apod import ApodCrud
 from database.postgres.core.protocols import ApodProtocol
+from dialogs.apod.service.apod_other_media_resolver import ApodOtherMediaResolver
+from dialogs.apod.service.chat_action_sender import ChatActionSender
+from dialogs.apod.service.video_downloader import VideoDownloader
 from utils.enums.apod_content_type import ApodContentType
 from utils.http_client import HttpClient
 
@@ -28,6 +31,8 @@ class ApodProvider:
 
     __apod_url_parts: tuple[str, str] = "planetary", "apod"
     __apod_crud: ApodCrud = ApodCrud()
+    __other_media_resolver: ApodOtherMediaResolver = ApodOtherMediaResolver()
+    __chat_action_sender: ChatActionSender | None = None
 
     @log_return_value
     def __get_apod_url(self, apod_date: str | None, is_random: bool) -> URL:
@@ -50,45 +55,39 @@ class ApodProvider:
 
         return app_settings.api.build_nasa_url(*self.__apod_url_parts, **query_params)
 
-    @staticmethod
-    async def __get_apod_media(media_type: str, media_url: str, apod_date: str) -> Union[MediaAttachment, None]:
+    async def __get_apod_media(self, media_type: str, media_url: str, apod_date: str) -> MediaAttachment:
         """
         Download APOD media and wrap it as a MediaAttachment.
 
         Args:
-            media_type (str): Type of media ("image" or "video").
+            media_type (str): Type of media ("image", "video" or "other").
             media_url (str): URL to the media resource.
             apod_date (str): Date of the APOD (used for logging).
 
         Returns:
-            MediaAttachment | None: Wrapped media, or None if download failed.
+            MediaAttachment: Wrapped media.
         """
         logger.info(f"APOD url at {apod_date}: {media_url}")
 
+        if media_type == "other" and self.__other_media_resolver.src and self.__other_media_resolver.media_type:
+            media_url = str(app_settings.api.nasa_apod_base_url / self.__other_media_resolver.src)
+            media_type = self.__other_media_resolver.media_type
+
+        if self.__chat_action_sender:
+            await self.__chat_action_sender.send_chat_action(media_type)
+
         if media_type == "image":
-            media = MediaAttachment(ContentType.PHOTO, media_url)
-        else:
-            ydl_opts = {
-                "format": "best[ext=mp4]/best",
-                "outtmpl": str(Path(app_settings.get_full_temp_path(), "%(title)s.%(ext)s")),
-                "quiet": app_settings.suppress_download_logs,
-            }
+            return MediaAttachment(ContentType.PHOTO, media_url)
 
-            try:
-                with YoutubeDL(ydl_opts) as ydl:
-                    info = ydl.extract_info(media_url, download=True)
-                    filename = ydl.prepare_filename(info)
-                    logger.info(f"Saved to: {filename}")
-            except DownloadError:
-                logger.warning(f"Failed to download media from {media_url}")
-                return None
+        try:
+            VideoDownloader.download(media_url)
+        except DownloadError:
+            logger.warning(f"Failed to download media from {media_url}")
+            raise
 
-            media = MediaAttachment(ContentType.VIDEO, path=filename)
+        return MediaAttachment(ContentType.VIDEO, path=VideoDownloader.filename, supports_streaming=True)
 
-        return media
-
-    @staticmethod
-    async def __prepare_payload(data: dict[str, Any]) -> dict[str, Any]:
+    async def __prepare_payload(self, data: dict[str, Any]) -> dict[str, Any]:
         """
         Clean and optionally translate APOD data fields.
 
@@ -107,6 +106,13 @@ class ApodProvider:
             data["title_ru"] = translated_texts[0]["text"]
             data["explanation_ru"] = translated_texts[1]["text"]
 
+            if data["media_type"] == "other":
+                await self.__other_media_resolver(data["date"])
+
+                if self.__other_media_resolver.src and self.__other_media_resolver.media_type:
+                    data["url"] = str(URL(app_settings.api.nasa_apod_base_url / self.__other_media_resolver.src))
+                    data["media_type"] = self.__other_media_resolver.media_type
+
         return data
 
     async def __get_apod_data(self, apod_date: str | None, is_random: bool) -> dict[str, Any]:
@@ -120,44 +126,22 @@ class ApodProvider:
         Returns:
             dict[str, Any]: Final prepared data with optional translation.
         """
-        apod_json: dict[str, Any] = await HttpClient.get(url=self.__get_apod_url(apod_date, is_random))
+        response: ClientResponse = await HttpClient.get(url=self.__get_apod_url(apod_date, is_random))
+        apod_json: dict[str, Any] = await response.json()
 
         if isinstance(apod_json, list):
             apod_json = apod_json[0]
 
         return await self.__prepare_payload(apod_json)
 
-    @staticmethod
-    async def __send_chat_action(dialog_manager: DialogManager, media_type: str) -> None:
-        """
-        Send a chat action (e.g., 'uploading photo/video') based on the APOD media type.
-
-        Improves UX by showing a loading indicator while media is being prepared.
-
-        Args:
-            dialog_manager (DialogManager): Dialog context, used to access bot and chat ID.
-            media_type (str): Media type string ("image" or "video").
-        """
-        bot: Bot | None = dialog_manager.event.bot
-
-        if bot:
-            event: Message | CallbackQuery = cast(Message | CallbackQuery, dialog_manager.event)
-
-            if isinstance(event, Message):
-                chat_id: int = event.chat.id
-            elif isinstance(event, CallbackQuery):
-                message = cast(Message, event.message)
-                chat_id = message.chat.id
-            else:
-                raise ValueError(f"Event is not a Message or CallbackQuery ({type(event)}).")
-
-            if media_type == "image":
-                await bot.send_chat_action(chat_id, ChatAction.UPLOAD_PHOTO)
-            elif media_type == "video":
-                await bot.send_chat_action(chat_id, ChatAction.UPLOAD_VIDEO)
-
     async def __call__(
-        self, dialog_manager: DialogManager, i18n: TranslatorRunner, language_code: str, bot: Bot, **_: Any
+        self,
+        dialog_manager: DialogManager,
+        i18n: TranslatorRunner,
+        language_code: str,
+        bot: Bot,
+        event_from_user: User,
+        **_: Any,
     ) -> dict[str, Any]:
         """
         Callable interface to prepare dialog context with APOD content.
@@ -171,6 +155,8 @@ class ApodProvider:
         Returns:
             dict[str, Any]: Dialog context data with localized UI strings and APOD media if available.
         """
+        self.__chat_action_sender = ChatActionSender(event_from_user.id, bot)
+
         apod_date = dialog_manager.dialog_data.pop("apod_date", None)
         is_random = dialog_manager.dialog_data.pop("is_random", False)
 
@@ -190,9 +176,6 @@ class ApodProvider:
             apod_data: dict[str, Any] = await self.__get_apod_data(apod_date=apod_date, is_random=is_random)
             apod = cast(ApodProtocol, await self.__apod_crud.get_or_create(**apod_data))
             media = await self.__get_apod_media(apod.media_type, apod.url, apod.date.strftime("%Y-%m-%d"))
-
-        if not apod.file_id:
-            await self.__send_chat_action(dialog_manager, apod.media_type)
 
         result = {
             "select_date_button_text": i18n.get("select_date"),

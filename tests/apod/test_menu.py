@@ -5,6 +5,7 @@ from typing import Any, cast
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from aiogram.types import User
 from aiogram_dialog import DialogManager
 from aiogram_dialog.api.entities import MediaAttachment
 from fluentogram import TranslatorHub
@@ -51,6 +52,7 @@ class TestMenu:
             i18n=translator_hub.get_translator_by_locale(language_code),
             language_code=language_code,
             bot=bot_mock,
+            event_from_user=User(id=123456789, first_name="Name", is_bot=False),
         )
         texts = self._texts_to_language_code[language_code]
 
@@ -85,6 +87,7 @@ class TestMenu:
             i18n=translator_hub.get_translator_by_locale(language_code),
             language_code=language_code,
             bot=bot_mock,
+            event_from_user=User(id=123456789, first_name="Name", is_bot=False),
         )
         texts = self._texts_to_language_code[language_code]
 
