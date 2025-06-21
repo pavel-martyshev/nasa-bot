@@ -8,7 +8,6 @@ import pytest
 from aiogram.types import User
 from aiogram_dialog import DialogManager
 from aiogram_dialog.api.entities import MediaAttachment
-from aiohttp import ClientResponse
 from fluentogram import TranslatorHub
 from yarl import URL
 from yt_dlp import DownloadError
@@ -37,13 +36,13 @@ class TestMenu:
         mock_translate: AsyncMock,
         bot_mock: BotMock,
         translator_hub: TranslatorHub,
-        fake_response: AsyncMock,
+        response_data: dict[str, str],
         translate_return_value: dict[str, list[dict[str, str]]],
         language_code: str,
         dialog_data: dict[str, Any],
         apod_caption: str,
     ) -> None:
-        mock_get.return_value = fake_response
+        mock_get.return_value = response_data
         mock_translate.return_value = translate_return_value
 
         dialog_manager_factory = DialogManagerFactory(dialog_data)
@@ -72,13 +71,13 @@ class TestMenu:
         mock_translate: AsyncMock,
         bot_mock: BotMock,
         translator_hub: TranslatorHub,
-        fake_response: AsyncMock,
+        response_data: dict[str, str],
         translate_return_value: dict[str, list[dict[str, str]]],
         language_code: str,
         dialog_data: dict[str, Any],
         media_not_exist_message: str,
     ) -> None:
-        mock_get.return_value = fake_response
+        mock_get.return_value = response_data
         mock_translate.return_value = translate_return_value
 
         dialog_manager_factory = DialogManagerFactory(dialog_data)
@@ -98,28 +97,23 @@ class TestMenu:
         assert result["select_date_button_text"] == texts.select_date_button_text
 
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     @pytest.mark.asyncio
     async def test_apod_provider_with_image_ru(
         self, mock_get: AsyncMock, mock_translate: AsyncMock, bot_mock: BotMock, translator_hub: TranslatorHub
     ) -> None:
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": "2025-05-05",
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "image",
-                "url": "https://api.nasa.gov/fake.jpg",
-            }
-        )
-
         await self._test_available_video_or_image(
             mock_get,
             mock_translate,
             bot_mock,
             translator_hub,
-            fake_response,
+            {
+                "date": "2025-05-05",
+                "title": "Test title",
+                "explanation": "Test explanation",
+                "media_type": "image",
+                "url": "https://api.nasa.gov/fake.jpg",
+            },
             {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]},
             "ru",
             {"apod_date": "2025-05-05", "is_random": False},
@@ -127,29 +121,25 @@ class TestMenu:
         )
 
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     @pytest.mark.asyncio
     async def test_apod_provider_with_today_image_ru(
         self, mock_get: AsyncMock, mock_translate: AsyncMock, bot_mock: BotMock, translator_hub: TranslatorHub
     ) -> None:
         today: str = datetime.today().strftime("%Y-%m-%d")
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": today,
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "image",
-                "url": "https://api.nasa.gov/fake.jpg",
-            }
-        )
 
         await self._test_available_video_or_image(
             mock_get,
             mock_translate,
             bot_mock,
             translator_hub,
-            fake_response,
+            {
+                "date": today,
+                "title": "Test title",
+                "explanation": "Test explanation",
+                "media_type": "image",
+                "url": "https://api.nasa.gov/fake.jpg",
+            },
             {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]},
             "ru",
             {},
@@ -158,7 +148,7 @@ class TestMenu:
 
     @patch("dialogs.apod.service.video_downloader.YoutubeDL")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     @pytest.mark.asyncio
     async def test_apod_provider_with_available_video_ru(
         self,
@@ -174,23 +164,18 @@ class TestMenu:
         mock_ydl_instance.extract_info.return_value = {"title": "test_video"}
         mock_ydl_instance.prepare_filename.return_value = "tests/static/test_video.mp4"
 
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": "2025-05-06",
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "video",
-                "url": "https://www.youtube.com/embed/rQcKIN9vj3U?rel=0",
-            }
-        )
-
         await self._test_available_video_or_image(
             mock_get,
             mock_translate,
             bot_mock,
             translator_hub,
-            fake_response,
+            {
+                "date": "2025-05-06",
+                "title": "Test title",
+                "explanation": "Test explanation",
+                "media_type": "video",
+                "url": "https://www.youtube.com/embed/rQcKIN9vj3U?rel=0",
+            },
             {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]},
             "ru",
             {"apod_date": "2025-05-06", "is_random": False},
@@ -199,7 +184,7 @@ class TestMenu:
 
     @patch("dialogs.apod.service.video_downloader.YoutubeDL")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     @pytest.mark.asyncio
     async def test_apod_provider_with_unavailable_video_ru(
         self,
@@ -214,23 +199,18 @@ class TestMenu:
 
         mock_ydl_instance.extract_info.side_effect = DownloadError("fail")
 
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": "2013-02-18",
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "video",
-                "url": "https://www.youtube.com/embed/90Omh7_I8vI?rel=0",
-            }
-        )
-
         await self._test_unavailable_video(
             mock_get,
             mock_translate,
             bot_mock,
             translator_hub,
-            fake_response,
+            {
+                "date": "2013-02-18",
+                "title": "Test title",
+                "explanation": "Test explanation",
+                "media_type": "video",
+                "url": "https://www.youtube.com/embed/90Omh7_I8vI?rel=0",
+            },
             {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]},
             "ru",
             {"apod_date": "2013-02-18", "is_random": False},
@@ -242,28 +222,23 @@ class TestMenu:
         )
 
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     @pytest.mark.asyncio
     async def test_apod_provider_with_image_en(
         self, mock_get: AsyncMock, mock_translate: AsyncMock, bot_mock: BotMock, translator_hub: TranslatorHub
     ) -> None:
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": "2025-05-05",
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "image",
-                "url": "https://api.nasa.gov/fake.jpg",
-            }
-        )
-
         await self._test_available_video_or_image(
             mock_get,
             mock_translate,
             bot_mock,
             translator_hub,
-            fake_response,
+            {
+                "date": "2025-05-05",
+                "title": "Test title",
+                "explanation": "Test explanation",
+                "media_type": "image",
+                "url": "https://api.nasa.gov/fake.jpg",
+            },
             {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]},
             "en",
             {"apod_date": "2025-05-05", "is_random": False},
@@ -271,29 +246,25 @@ class TestMenu:
         )
 
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     @pytest.mark.asyncio
     async def test_apod_provider_with_today_image_en(
         self, mock_get: AsyncMock, mock_translate: AsyncMock, bot_mock: BotMock, translator_hub: TranslatorHub
     ) -> None:
         today: str = datetime.today().strftime("%Y-%m-%d")
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": today,
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "image",
-                "url": "https://api.nasa.gov/fake.jpg",
-            }
-        )
 
         await self._test_available_video_or_image(
             mock_get,
             mock_translate,
             bot_mock,
             translator_hub,
-            fake_response,
+            {
+                "date": today,
+                "title": "Test title",
+                "explanation": "Test explanation",
+                "media_type": "image",
+                "url": "https://api.nasa.gov/fake.jpg",
+            },
             {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]},
             "en",
             {},
@@ -302,7 +273,7 @@ class TestMenu:
 
     @patch("dialogs.apod.service.video_downloader.YoutubeDL")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     @pytest.mark.asyncio
     async def test_apod_provider_with_available_video_en(
         self,
@@ -318,23 +289,18 @@ class TestMenu:
         mock_ydl_instance.extract_info.return_value = {"title": "test_video"}
         mock_ydl_instance.prepare_filename.return_value = "tests/static/test_video.mp4"
 
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": "2025-05-06",
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "video",
-                "url": "https://www.youtube.com/embed/rQcKIN9vj3U?rel=0",
-            }
-        )
-
         await self._test_available_video_or_image(
             mock_get,
             mock_translate,
             bot_mock,
             translator_hub,
-            fake_response,
+            {
+                "date": "2025-05-06",
+                "title": "Test title",
+                "explanation": "Test explanation",
+                "media_type": "video",
+                "url": "https://www.youtube.com/embed/rQcKIN9vj3U?rel=0",
+            },
             {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]},
             "en",
             {"apod_date": "2025-05-06", "is_random": False},
@@ -343,7 +309,7 @@ class TestMenu:
 
     @patch("dialogs.apod.service.video_downloader.YoutubeDL")
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     @pytest.mark.asyncio
     async def test_apod_provider_with_unavailable_video_en(
         self,
@@ -358,23 +324,18 @@ class TestMenu:
 
         mock_ydl_instance.extract_info.side_effect = DownloadError("fail")
 
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": "2013-02-18",
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "video",
-                "url": "https://www.youtube.com/embed/90Omh7_I8vI?rel=0",
-            }
-        )
-
         await self._test_unavailable_video(
             mock_get,
             mock_translate,
             bot_mock,
             translator_hub,
-            fake_response,
+            {
+                "date": "2013-02-18",
+                "title": "Test title",
+                "explanation": "Test explanation",
+                "media_type": "video",
+                "url": "https://www.youtube.com/embed/90Omh7_I8vI?rel=0",
+            },
             {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]},
             "en",
             {"apod_date": "2013-02-18", "is_random": False},
@@ -386,7 +347,7 @@ class TestMenu:
 
     @pytest.mark.asyncio
     @patch("dialogs.apod.getters.apod_menu.HttpClient.translate")
-    @patch("dialogs.apod.getters.apod_menu.HttpClient.get")
+    @patch("dialogs.apod.getters.apod_menu.HttpClient.get_json")
     async def test_apod_provider_creates_apod_record(
         self,
         mock_get: AsyncMock,
@@ -395,19 +356,14 @@ class TestMenu:
         init_db: AsyncGenerator[None, Any],
         translator_hub: TranslatorHub,
     ) -> None:
-        fake_response = AsyncMock(spec=ClientResponse)
-        fake_response.json = AsyncMock(
-            return_value={
-                "date": "2025-05-05",
-                "title": "Test title",
-                "explanation": "Test explanation",
-                "media_type": "image",
-                "url": "https://api.nasa.gov/fake.jpg",
-                "hdurl": "https://api.nasa.gov/fake_hd.jpg",
-            }
-        )
-
-        mock_get.return_value = fake_response
+        mock_get.return_value = {
+            "date": "2025-05-05",
+            "title": "Test title",
+            "explanation": "Test explanation",
+            "media_type": "image",
+            "url": "https://api.nasa.gov/fake.jpg",
+            "hdurl": "https://api.nasa.gov/fake_hd.jpg",
+        }
 
         mock_translate.return_value = {"translations": [{"text": "Тестовый заголовок"}, {"text": "Тестовое пояснение"}]}
 
