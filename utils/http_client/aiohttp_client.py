@@ -44,6 +44,22 @@ class HttpClient:
         return await response.json()
 
     @staticmethod
+    @request_executor()
+    async def get_text(response: ClientResponse, *_: Any, **__: Any) -> str:
+        """
+        Perform a GET request and parse the response as text.
+
+        Args:
+            response (ClientResponse): Response object from aiohttp session.
+            *_ (unused): Ignored positional arguments.
+            **__ (unused): Ignored keyword arguments.
+
+        Returns:
+            str: Response text.
+        """
+        return await response.text()
+
+    @staticmethod
     @request_executor(method="POST")
     async def __execute_translation(response: ClientResponse, *_: Any, **__: Any) -> Any:
         """

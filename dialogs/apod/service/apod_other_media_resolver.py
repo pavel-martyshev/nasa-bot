@@ -1,6 +1,5 @@
 from typing import cast
 
-from aiohttp import ClientResponse
 from bs4 import BeautifulSoup
 from bs4.element import AttributeValueList
 from yarl import URL
@@ -43,8 +42,7 @@ class ApodOtherMediaResolver:
             ValueError: If source or media type could not be extracted.
         """
 
-        response: ClientResponse = await HttpClient.get(str(url))
-        bs: BeautifulSoup = BeautifulSoup(await response.text(), "html.parser")
+        bs: BeautifulSoup = BeautifulSoup(await HttpClient.get_text(url=str(url)), "html.parser")
         source = bs.source
 
         if source:
