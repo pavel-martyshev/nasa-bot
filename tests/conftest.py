@@ -98,4 +98,4 @@ def bot_mock() -> BotMock:
 
 @pytest.fixture(autouse=True)
 def disable_send_chat_action(monkeypatch):
-    monkeypatch.setattr("dialogs.apod.getters.apod_menu.ApodProvider._ApodProvider__send_chat_action", AsyncMock())
+    monkeypatch.setattr("dialogs.apod.service.chat_action_sender.ChatActionSender.send_chat_action", AsyncMock())

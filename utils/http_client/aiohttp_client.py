@@ -13,7 +13,7 @@ class HttpClient:
 
     @staticmethod
     @request_executor()
-    async def get(response: ClientResponse, *_: Any, **__: Any) -> Any:
+    async def get(response: ClientResponse, *_: Any, **__: Any) -> ClientResponse:
         """
         Perform a GET request and parse the response as JSON.
 
@@ -23,9 +23,9 @@ class HttpClient:
             **__ (unused): Ignored keyword arguments.
 
         Returns:
-            Any: Parsed JSON response.
+            ClientResponse: response object.
         """
-        return await response.json()
+        return response
 
     @staticmethod
     @request_executor(method="POST")

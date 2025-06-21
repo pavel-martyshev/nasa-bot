@@ -128,6 +128,7 @@ def load_settings() -> AppSettings:
         api=APISettings(
             nasa_api_base_url=URL(os.getenv("NASA_API_BASE_URL", "")),
             nasa_api_key=os.getenv("NASA_API_KEY", ""),
+            nasa_apod_base_url=URL(os.getenv("NASA_APOD_BASE_URL", "")),
             translate_api_url=URL(os.getenv("TRANSLATE_API_URL", "")),
             translate_api_key=os.getenv("TRANSLATE_API_KEY", ""),
             folder_id=os.getenv("FOLDER_ID", ""),

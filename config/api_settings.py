@@ -12,6 +12,7 @@ class APISettings:
     Attributes:
     nasa_api_base_url (URL): Base URL for the NASA API.
     nasa_api_key (str): API key for NASA API.
+    nasa_apod_base_url (str): Base URL for the NASA APOD.
     translate_api_url (URL): Base URL for the translation API.
     translate_api_key (str): API key for the translation API.
     folder_id (str): Yandex Cloud folder ID.
@@ -24,6 +25,7 @@ class APISettings:
 
     nasa_api_base_url: URL
     nasa_api_key: str
+    nasa_apod_base_url: URL
 
     translate_api_url: URL
     translate_api_key: str
@@ -43,6 +45,9 @@ class APISettings:
 
         if not self.nasa_api_key:
             raise KeyError(error_message.format(argument_name="nasa_api_key"))
+
+        if not self.nasa_apod_base_url:
+            raise KeyError(error_message.format(argument_name="nasa_apod_base_url"))
 
         if not self.translate_api_url:
             raise KeyError(error_message.format(argument_name="translate_api_url"))
