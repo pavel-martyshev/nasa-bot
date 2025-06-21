@@ -74,7 +74,7 @@ class ApodProvider:
             media_type = self.__other_media_resolver.media_type
 
         if self.__chat_action_sender:
-            await self.__chat_action_sender.send_chat_action(media_type)
+            await self.__chat_action_sender.send_chat_action(cast(str, media_type))
 
         if media_type == "image":
             return MediaAttachment(ContentType.PHOTO, media_url)
@@ -175,7 +175,11 @@ class ApodProvider:
         else:
             apod_data: dict[str, Any] = await self.__get_apod_data(apod_date=apod_date, is_random=is_random)
             apod = cast(ApodProtocol, await self.__apod_crud.get_or_create(**apod_data))
-            media = await self.__get_apod_media(apod.media_type, apod.url, apod.date.strftime("%Y-%m-%d"))
+
+            try:
+                media = await self.__get_apod_media(apod.media_type, apod.url, apod.date.strftime("%Y-%m-%d"))
+            except DownloadError:
+                media = None
 
         result = {
             "select_date_button_text": i18n.get("select_date"),
