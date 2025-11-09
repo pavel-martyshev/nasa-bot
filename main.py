@@ -170,4 +170,5 @@ if __name__ == "__main__":
         print("Started on webhook")
         run_webhook(translator_hub)
     else:
+        print("Started on long polling")
         asyncio.run(run_polling(translator_hub))
