@@ -167,6 +167,7 @@ if __name__ == "__main__":
     setup_dispatcher()
 
     if app_settings.api.is_webhook_enabled:
+        print("Started on webhook")
         run_webhook(translator_hub)
     else:
         asyncio.run(run_polling(translator_hub))
